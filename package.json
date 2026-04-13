@@ -1,0 +1,60 @@
+{
+  "name": "leadgenerator-erp",
+  "version": "1.0.0",
+  "description": "LeadGenerator ERP – Professional Lead Management Desktop App",
+  "main": "electron/main.js",
+  "scripts": {
+    "start":   "electron .",
+    "dist":    "electron-builder --win --x64",
+    "dist:all":"electron-builder -mwl"
+  },
+  "build": {
+    "appId": "com.leadgen.erp",
+    "productName": "LeadGenerator ERP",
+    "copyright": "Copyright © 2025",
+    "win": {
+      "target": [{ "target": "nsis", "arch": ["x64"] }],
+      "icon": "electron/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "installerIcon": "electron/icon.ico",
+      "installerHeaderIcon": "electron/icon.ico",
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "LeadGenerator ERP"
+    },
+    "files": [
+      "electron/**/*",
+      "frontend/**/*",
+      "backend/**/*",
+      "models/**/*",
+      "routes/**/*",
+      "utils/**/*",
+      "requirements.txt",
+      "!**/venv/**",
+      "!**/__pycache__/**",
+      "!**/*.pyc"
+    ],
+    "extraResources": [
+      {
+        "from": "backend",
+        "to":   "backend",
+        "filter": ["**/*", "!**/__pycache__/**"]
+      },
+      {
+        "from": "frontend",
+        "to":   "frontend",
+        "filter": ["**/*"]
+      }
+    ],
+    "directories": {
+      "output": "dist"
+    }
+  },
+  "devDependencies": {
+    "electron":         "^29.0.0",
+    "electron-builder": "^24.0.0"
+  }
+}

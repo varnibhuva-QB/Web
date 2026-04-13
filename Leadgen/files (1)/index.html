@@ -1,0 +1,1109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>LeadGen Pro — Business Lead Extraction Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg:        #080c10;
+    --surface:   #0d1117;
+    --surface2:  #161b22;
+    --surface3:  #1f2937;
+    --border:    #21293a;
+    --accent:    #00d4a0;
+    --accent2:   #0ea5e9;
+    --accent3:   #f59e0b;
+    --danger:    #ef4444;
+    --text:      #e2e8f0;
+    --muted:     #64748b;
+    --mono:      'Space Mono', monospace;
+    --sans:      'Syne', sans-serif;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--sans);
+    min-height:100vh;
+    overflow-x:hidden;
+  }
+
+  /* ── Grid noise texture ── */
+  body::before{
+    content:'';
+    position:fixed;inset:0;
+    background-image:
+      radial-gradient(circle at 20% 20%, rgba(0,212,160,.06) 0%, transparent 50%),
+      radial-gradient(circle at 80% 80%, rgba(14,165,233,.06) 0%, transparent 50%);
+    pointer-events:none;z-index:0;
+  }
+
+  /* ── Layout ── */
+  .app{position:relative;z-index:1;max-width:1400px;margin:0 auto;padding:0 24px}
+
+  /* ── Header ── */
+  header{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:20px 0;border-bottom:1px solid var(--border);
+    margin-bottom:32px;
+  }
+  .logo{
+    display:flex;align-items:center;gap:12px;
+  }
+  .logo-icon{
+    width:40px;height:40px;
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    border-radius:10px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:20px;
+  }
+  .logo-text{font-family:var(--sans);font-weight:800;font-size:1.4rem;letter-spacing:-0.5px}
+  .logo-text span{color:var(--accent)}
+  .header-status{
+    display:flex;align-items:center;gap:8px;
+    font-family:var(--mono);font-size:.7rem;color:var(--muted);
+  }
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--accent);animation:pulse 2s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+  /* ── Disclaimer banner ── */
+  .disclaimer{
+    background:linear-gradient(135deg,rgba(245,158,11,.1),rgba(245,158,11,.05));
+    border:1px solid rgba(245,158,11,.3);
+    border-radius:10px;padding:12px 16px;
+    font-size:.78rem;color:var(--accent3);
+    margin-bottom:28px;display:flex;align-items:flex-start;gap:10px;
+    font-family:var(--mono);
+  }
+  .disclaimer strong{display:block;margin-bottom:3px}
+
+  /* ── Stats row ── */
+  .stats-row{
+    display:grid;grid-template-columns:repeat(4,1fr);gap:16px;
+    margin-bottom:32px;
+  }
+  .stat-card{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:12px;padding:20px;
+    position:relative;overflow:hidden;
+    transition:border-color .2s;
+  }
+  .stat-card:hover{border-color:var(--accent)}
+  .stat-card::before{
+    content:'';position:absolute;top:0;left:0;right:0;height:2px;
+    background:linear-gradient(90deg,var(--accent),var(--accent2));
+    opacity:0;transition:opacity .2s;
+  }
+  .stat-card:hover::before{opacity:1}
+  .stat-label{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;font-family:var(--mono)}
+  .stat-value{font-size:2rem;font-weight:800;color:var(--text);line-height:1}
+  .stat-sub{font-size:.72rem;color:var(--accent);margin-top:4px;font-family:var(--mono)}
+
+  /* ── Main grid ── */
+  .main-grid{display:grid;grid-template-columns:420px 1fr;gap:24px;align-items:start}
+
+  /* ── Control panel ── */
+  .panel{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:16px;padding:24px;
+    position:sticky;top:24px;
+  }
+  .panel-title{
+    font-size:1rem;font-weight:700;color:var(--text);
+    margin-bottom:20px;padding-bottom:16px;
+    border-bottom:1px solid var(--border);
+    display:flex;align-items:center;gap:8px;
+  }
+  .panel-title .badge{
+    font-family:var(--mono);font-size:.6rem;
+    background:rgba(0,212,160,.15);color:var(--accent);
+    border:1px solid rgba(0,212,160,.3);
+    padding:2px 8px;border-radius:20px;
+  }
+
+  /* Source selector */
+  .source-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:20px}
+  .source-btn{
+    background:var(--surface2);border:1px solid var(--border);
+    border-radius:10px;padding:10px 12px;
+    cursor:pointer;transition:all .15s;
+    text-align:left;
+    display:flex;align-items:center;gap:8px;
+  }
+  .source-btn:hover{border-color:var(--accent);background:rgba(0,212,160,.05)}
+  .source-btn.active{
+    border-color:var(--accent);
+    background:rgba(0,212,160,.1);
+  }
+  .source-icon{font-size:1.1rem}
+  .source-name{font-size:.75rem;font-weight:600;color:var(--text);line-height:1.2}
+  .source-method{font-size:.6rem;color:var(--muted);font-family:var(--mono)}
+
+  /* Form inputs */
+  .field{margin-bottom:16px}
+  .field label{
+    display:block;font-size:.72rem;font-weight:600;color:var(--muted);
+    text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;
+    font-family:var(--mono);
+  }
+  .field input,.field select{
+    width:100%;background:var(--surface2);
+    border:1px solid var(--border);border-radius:8px;
+    padding:11px 14px;color:var(--text);
+    font-family:var(--mono);font-size:.85rem;
+    transition:border-color .15s;
+    outline:none;
+    -webkit-appearance:none;
+  }
+  .field input:focus,.field select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(0,212,160,.08)}
+  .field input::placeholder{color:var(--muted)}
+  .field select option{background:var(--surface2)}
+
+  .field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+  /* Buttons */
+  .btn-primary{
+    width:100%;padding:14px;border:none;border-radius:10px;
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    color:#000;font-family:var(--sans);font-weight:700;font-size:.9rem;
+    cursor:pointer;transition:opacity .15s,transform .1s;
+    letter-spacing:.3px;
+  }
+  .btn-primary:hover{opacity:.9;transform:translateY(-1px)}
+  .btn-primary:active{transform:translateY(0)}
+  .btn-primary:disabled{opacity:.4;cursor:not-allowed;transform:none}
+  .btn-danger{
+    width:100%;padding:10px;border:1px solid var(--danger);border-radius:8px;
+    background:rgba(239,68,68,.1);color:var(--danger);
+    font-family:var(--sans);font-weight:600;font-size:.82rem;
+    cursor:pointer;margin-top:8px;transition:all .15s;
+  }
+  .btn-danger:hover{background:rgba(239,68,68,.2)}
+  .btn-sm{
+    padding:6px 14px;border-radius:6px;border:1px solid var(--border);
+    background:var(--surface2);color:var(--text);font-size:.75rem;
+    cursor:pointer;font-family:var(--mono);transition:all .15s;
+  }
+  .btn-sm:hover{border-color:var(--accent);color:var(--accent)}
+
+  /* Progress */
+  .progress-section{margin-top:20px;padding-top:20px;border-top:1px solid var(--border);display:none}
+  .progress-section.visible{display:block}
+  .progress-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+  .progress-label{font-size:.72rem;font-family:var(--mono);color:var(--muted)}
+  .progress-pct{font-size:.8rem;font-family:var(--mono);color:var(--accent);font-weight:700}
+  .progress-bar{height:4px;background:var(--surface3);border-radius:4px;overflow:hidden;margin-bottom:12px}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .3s;border-radius:4px}
+  .status-pill{
+    display:inline-flex;align-items:center;gap:6px;
+    font-family:var(--mono);font-size:.7rem;padding:4px 10px;border-radius:20px;
+  }
+  .status-pill.running{background:rgba(0,212,160,.15);color:var(--accent);border:1px solid rgba(0,212,160,.3)}
+  .status-pill.done{background:rgba(14,165,233,.15);color:var(--accent2);border:1px solid rgba(14,165,233,.3)}
+  .status-pill.error{background:rgba(239,68,68,.15);color:var(--danger);border:1px solid rgba(239,68,68,.3)}
+  .status-pill.queued{background:rgba(245,158,11,.15);color:var(--accent3);border:1px solid rgba(245,158,11,.3)}
+  .status-pill.cancelled{background:rgba(100,116,139,.15);color:var(--muted);border:1px solid var(--border)}
+
+  /* Logs */
+  .log-box{
+    background:var(--bg);border:1px solid var(--border);border-radius:8px;
+    padding:10px;max-height:140px;overflow-y:auto;margin-top:12px;
+  }
+  .log-entry{font-family:var(--mono);font-size:.65rem;color:var(--muted);line-height:1.6;word-break:break-all}
+  .log-entry .ts{color:var(--surface3);margin-right:6px}
+
+  /* ── Results panel ── */
+  .results-panel{
+    background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;
+  }
+  .results-header{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:20px 24px;border-bottom:1px solid var(--border);
+  }
+  .results-title{font-weight:700;font-size:1rem;display:flex;align-items:center;gap:8px}
+  .count-badge{
+    font-family:var(--mono);font-size:.7rem;
+    background:var(--surface3);color:var(--muted);
+    padding:3px 10px;border-radius:20px;
+  }
+  .results-actions{display:flex;gap:8px;align-items:center}
+
+  /* Filter bar */
+  .filter-bar{
+    display:flex;gap:10px;padding:14px 24px;
+    border-bottom:1px solid var(--border);
+    background:var(--surface2);
+    flex-wrap:wrap;
+  }
+  .filter-bar input,.filter-bar select{
+    background:var(--surface);border:1px solid var(--border);border-radius:6px;
+    padding:7px 12px;color:var(--text);font-size:.78rem;font-family:var(--mono);
+    outline:none;transition:border-color .15s;
+    -webkit-appearance:none;
+  }
+  .filter-bar input:focus,.filter-bar select:focus{border-color:var(--accent)}
+  .filter-bar input::placeholder{color:var(--muted)}
+  .filter-pill{
+    display:flex;align-items:center;gap:4px;
+    padding:5px 12px;border:1px solid var(--border);border-radius:20px;
+    font-size:.72rem;color:var(--muted);cursor:pointer;background:var(--surface);
+    font-family:var(--mono);transition:all .15s;white-space:nowrap;
+  }
+  .filter-pill.active{border-color:var(--accent);color:var(--accent);background:rgba(0,212,160,.08)}
+
+  /* Table */
+  .table-wrap{overflow-x:auto;max-height:600px;overflow-y:auto}
+  table{width:100%;border-collapse:collapse;min-width:900px}
+  thead{position:sticky;top:0;z-index:10}
+  th{
+    background:var(--surface2);
+    padding:11px 16px;text-align:left;
+    font-size:.68rem;font-family:var(--mono);color:var(--muted);
+    text-transform:uppercase;letter-spacing:.8px;
+    border-bottom:1px solid var(--border);
+    white-space:nowrap;cursor:pointer;user-select:none;
+  }
+  th:hover{color:var(--accent)}
+  td{
+    padding:12px 16px;font-size:.8rem;border-bottom:1px solid rgba(33,41,58,.6);
+    vertical-align:middle;
+  }
+  tr:hover td{background:rgba(255,255,255,.02)}
+  tr:last-child td{border-bottom:none}
+
+  .td-name{font-weight:600;color:var(--text);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .td-phone{font-family:var(--mono);font-size:.75rem;color:var(--accent2)}
+  .td-email{font-family:var(--mono);font-size:.73rem;color:var(--accent)}
+  .td-address{color:var(--muted);font-size:.75rem;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .td-source{
+    font-family:var(--mono);font-size:.65rem;padding:3px 8px;border-radius:4px;
+    display:inline-block;white-space:nowrap;
+  }
+  .td-source.google_maps{background:rgba(0,212,160,.1);color:var(--accent);border:1px solid rgba(0,212,160,.2)}
+  .td-source.indiamart{background:rgba(245,158,11,.1);color:var(--accent3);border:1px solid rgba(245,158,11,.2)}
+  .td-source.justdial{background:rgba(14,165,233,.1);color:var(--accent2);border:1px solid rgba(14,165,233,.2)}
+  .td-source.tradeindia{background:rgba(168,85,247,.1);color:#a855f7;border:1px solid rgba(168,85,247,.2)}
+  .td-source.sulekha{background:rgba(239,68,68,.1);color:#f87171;border:1px solid rgba(239,68,68,.2)}
+  .td-source.yellowpages_in{background:rgba(250,204,21,.1);color:#facc15;border:1px solid rgba(250,204,21,.2)}
+
+  .rating{color:var(--accent3);font-family:var(--mono);font-size:.75rem}
+  .no-data{color:var(--muted);font-family:var(--mono);font-size:.72rem}
+
+  /* Export dropdown */
+  .export-wrap{position:relative}
+  .export-menu{
+    position:absolute;right:0;top:110%;
+    background:var(--surface2);border:1px solid var(--border);
+    border-radius:8px;min-width:150px;z-index:100;
+    box-shadow:0 8px 24px rgba(0,0,0,.4);display:none;
+  }
+  .export-menu.open{display:block}
+  .export-item{
+    padding:10px 16px;font-size:.8rem;cursor:pointer;
+    display:flex;align-items:center;gap:8px;
+    font-family:var(--mono);color:var(--text);
+    transition:background .1s;
+  }
+  .export-item:hover{background:rgba(255,255,255,.05);color:var(--accent)}
+  .export-item:first-child{border-radius:8px 8px 0 0}
+  .export-item:last-child{border-radius:0 0 8px 8px}
+
+  /* Pagination */
+  .pagination{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:14px 24px;border-top:1px solid var(--border);
+    font-size:.78rem;font-family:var(--mono);
+  }
+  .pagination-info{color:var(--muted)}
+  .page-btns{display:flex;gap:6px}
+  .page-btn{
+    padding:5px 12px;border:1px solid var(--border);border-radius:6px;
+    background:var(--surface2);color:var(--text);cursor:pointer;font-family:var(--mono);font-size:.75rem;
+    transition:all .1s;
+  }
+  .page-btn:hover,.page-btn.active{border-color:var(--accent);color:var(--accent)}
+  .page-btn:disabled{opacity:.3;cursor:not-allowed}
+
+  /* Empty state */
+  .empty{
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    padding:80px 24px;text-align:center;
+  }
+  .empty-icon{font-size:3rem;margin-bottom:16px;opacity:.4}
+  .empty-title{font-size:1.1rem;font-weight:700;color:var(--muted);margin-bottom:8px}
+  .empty-sub{font-size:.82rem;color:var(--surface3);max-width:280px;font-family:var(--mono)}
+
+  /* Toast */
+  #toast{
+    position:fixed;bottom:24px;right:24px;z-index:9999;
+    display:flex;flex-direction:column;gap:8px;
+  }
+  .toast-item{
+    background:var(--surface2);border:1px solid var(--border);
+    border-radius:10px;padding:12px 18px;
+    font-size:.8rem;font-family:var(--mono);
+    animation:slideIn .2s ease;max-width:320px;
+    display:flex;align-items:center;gap:10px;
+  }
+  .toast-item.success{border-color:rgba(0,212,160,.4);color:var(--accent)}
+  .toast-item.error{border-color:rgba(239,68,68,.4);color:var(--danger)}
+  @keyframes slideIn{from{transform:translateX(40px);opacity:0}to{transform:none;opacity:1}}
+
+  /* Responsive */
+  @media(max-width:900px){
+    .main-grid{grid-template-columns:1fr}
+    .stats-row{grid-template-columns:1fr 1fr}
+    .panel{position:static}
+    .source-grid{grid-template-columns:1fr 1fr 1fr}
+  }
+  @media(max-width:600px){
+    .stats-row{grid-template-columns:1fr 1fr}
+    .source-grid{grid-template-columns:1fr 1fr}
+    .field-row{grid-template-columns:1fr}
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar{width:5px;height:5px}
+  ::-webkit-scrollbar-track{background:var(--surface)}
+  ::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+  ::-webkit-scrollbar-thumb:hover{background:var(--muted)}
+</style>
+</head>
+<body>
+<div id="toast"></div>
+
+<div class="app">
+  <!-- Header -->
+  <header>
+    <div class="logo">
+      <div class="logo-icon">⚡</div>
+      <div>
+        <div class="logo-text">Lead<span>Gen</span> Pro</div>
+        <div style="font-size:.65rem;color:var(--muted);font-family:var(--mono)">Business Intelligence Platform</div>
+      </div>
+    </div>
+    <div class="header-status">
+      <div class="dot"></div>
+      <span id="apiStatus">API Connected</span>
+      <span style="margin-left:12px;color:var(--surface3)">|</span>
+      <span id="serverMode" style="margin-left:12px">Demo Mode</span>
+    </div>
+  </header>
+
+  <!-- Disclaimer -->
+  <div class="disclaimer">
+    <span style="font-size:1.1rem">⚖️</span>
+    <div>
+      <strong>Ethical Usage Disclaimer</strong>
+      This platform is for legitimate business research only. Always respect robots.txt, website Terms of Service, and applicable data protection laws (IT Act 2000, GDPR). Do not scrape personal data without consent. Use official APIs where available. The developers are not liable for misuse.
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-label">Total Leads</div>
+      <div class="stat-value" id="statTotal">0</div>
+      <div class="stat-sub" id="statSub">across all sources</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">With Phone</div>
+      <div class="stat-value" id="statPhone">0</div>
+      <div class="stat-sub" id="statPhonePct">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">With Email</div>
+      <div class="stat-value" id="statEmail">0</div>
+      <div class="stat-sub" id="statEmailPct">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Sources Active</div>
+      <div class="stat-value" id="statSources">6</div>
+      <div class="stat-sub">integrated</div>
+    </div>
+  </div>
+
+  <!-- Main -->
+  <div class="main-grid">
+    <!-- Control Panel -->
+    <div class="panel">
+      <div class="panel-title">
+        🎯 Scraping Controls
+        <span class="badge">LIVE</span>
+      </div>
+
+      <!-- Source Selection -->
+      <div style="margin-bottom:6px">
+        <label style="font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;font-family:var(--mono)">Select Source</label>
+      </div>
+      <div class="source-grid" id="sourceGrid">
+        <!-- populated by JS -->
+      </div>
+
+      <!-- Inputs -->
+      <div class="field">
+        <label>🔍 Search Keyword</label>
+        <input type="text" id="keyword" placeholder="e.g. restaurants, manufacturers, CA firms" />
+      </div>
+      <div class="field">
+        <label>📍 Location</label>
+        <input type="text" id="location" placeholder="e.g. Mumbai, Delhi, Bangalore" />
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Max Results</label>
+          <select id="maxResults">
+            <option value="20">20 leads</option>
+            <option value="50" selected>50 leads</option>
+            <option value="100">100 leads</option>
+            <option value="200">200 leads</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Min Rating</label>
+          <select id="minRating">
+            <option value="">Any</option>
+            <option value="3">3.0+</option>
+            <option value="4">4.0+</option>
+            <option value="4.5">4.5+</option>
+          </select>
+        </div>
+      </div>
+
+      <button class="btn-primary" id="scrapeBtn" onclick="startScraping()">
+        ⚡ Start Extraction
+      </button>
+      <button class="btn-danger" id="cancelBtn" style="display:none" onclick="cancelScraping()">
+        ✕ Cancel Job
+      </button>
+
+      <!-- Progress -->
+      <div class="progress-section" id="progressSection">
+        <div class="progress-header">
+          <div>
+            <div class="progress-label">Progress</div>
+            <div id="statusPill" class="status-pill queued">⏳ Queued</div>
+          </div>
+          <div class="progress-pct" id="progressPct">0%</div>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" id="progressFill" style="width:0%"></div>
+        </div>
+        <div style="font-family:var(--mono);font-size:.7rem;color:var(--muted);margin-bottom:6px" id="progressMsg">Initializing...</div>
+        <div style="font-family:var(--mono);font-size:.7rem;display:flex;gap:16px">
+          <span>Found: <strong id="leadsFound" style="color:var(--accent)">0</strong></span>
+          <span>Page: <strong id="currentPage" style="color:var(--accent2)">-</strong></span>
+        </div>
+        <div class="log-box" id="logBox"></div>
+      </div>
+
+      <!-- TOS note -->
+      <div id="tosNote" style="margin-top:16px;padding:10px;background:var(--surface2);border-radius:8px;border:1px solid var(--border);font-size:.68rem;color:var(--muted);font-family:var(--mono);display:none">
+        ℹ️ <span id="tosText"></span>
+      </div>
+    </div>
+
+    <!-- Results Panel -->
+    <div class="results-panel">
+      <div class="results-header">
+        <div class="results-title">
+          📊 Extracted Leads
+          <span class="count-badge" id="resultCount">0 records</span>
+        </div>
+        <div class="results-actions">
+          <button class="btn-sm" onclick="loadLeads()">↻ Refresh</button>
+          <div class="export-wrap">
+            <button class="btn-sm" onclick="toggleExport()" id="exportBtn">⬇ Export ▾</button>
+            <div class="export-menu" id="exportMenu">
+              <div class="export-item" onclick="exportLeads('csv')">📄 Export as CSV</div>
+              <div class="export-item" onclick="exportLeads('excel')">📊 Export as Excel</div>
+              <div class="export-item" onclick="exportLeads('json')">{ } Export as JSON</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filter bar -->
+      <div class="filter-bar">
+        <input type="text" id="filterName" placeholder="Filter by name..." oninput="applyFilters()" style="flex:1;min-width:120px"/>
+        <select id="filterSource" onchange="applyFilters()">
+          <option value="">All Sources</option>
+          <option value="google_maps">Google Maps</option>
+          <option value="indiamart">IndiaMART</option>
+          <option value="justdial">Justdial</option>
+          <option value="tradeindia">TradeIndia</option>
+          <option value="sulekha">Sulekha</option>
+          <option value="yellowpages_in">Yellow Pages</option>
+        </select>
+        <div class="filter-pill" id="filterEmail" onclick="toggleFilter('filterEmail','has_email')">✉ Has Email</div>
+        <div class="filter-pill" id="filterPhone" onclick="toggleFilter('filterPhone','has_phone')">📞 Has Phone</div>
+        <button class="btn-sm" onclick="clearFilters()">✕ Clear</button>
+      </div>
+
+      <!-- Table -->
+      <div class="table-wrap" id="tableWrap">
+        <div class="empty" id="emptyState">
+          <div class="empty-icon">🎯</div>
+          <div class="empty-title">No leads yet</div>
+          <div class="empty-sub">Select a source, enter your keyword and location, then hit Start Extraction</div>
+        </div>
+        <table id="leadsTable" style="display:none">
+          <thead>
+            <tr>
+              <th onclick="sortBy('business_name')">Business Name ↕</th>
+              <th onclick="sortBy('phone')">Phone</th>
+              <th onclick="sortBy('email')">Email</th>
+              <th onclick="sortBy('address')">Address</th>
+              <th onclick="sortBy('rating')">Rating ↕</th>
+              <th onclick="sortBy('source')">Source</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="leadsBody"></tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <div class="pagination" id="pagination" style="display:none">
+        <div class="pagination-info" id="paginationInfo">Showing 0–0 of 0</div>
+        <div class="page-btns" id="pageBtns"></div>
+      </div>
+    </div>
+  </div>
+
+  <div style="height:40px"></div>
+</div>
+
+<script>
+// ── Config ───────────────────────────────────────────────────────────────────
+const API_BASE = 'http://localhost:8000';
+
+const SOURCES = {
+  google_maps:    { name: 'Google Maps',    icon: '🗺️', method: 'Selenium' },
+  indiamart:      { name: 'IndiaMART',      icon: '🏭', method: 'BS4' },
+  justdial:       { name: 'Justdial',       icon: '📞', method: 'BS4' },
+  tradeindia:     { name: 'TradeIndia',     icon: '🤝', method: 'BS4' },
+  sulekha:        { name: 'Sulekha',        icon: '🔍', method: 'BS4' },
+  yellowpages_in: { name: 'Yellow Pages',   icon: '📒', method: 'BS4' },
+};
+
+const TOS_NOTES = {
+  google_maps:    'Use Google Places API for production. Selenium demo only.',
+  indiamart:      'IndiaMART API available at developer.indiamart.com.',
+  justdial:       'Justdial API available at developer.justdial.com.',
+  tradeindia:     'Check TradeIndia API documentation before production use.',
+  sulekha:        'Review Sulekha Terms of Service before scraping.',
+  yellowpages_in: 'Review Yellow Pages data usage policy.',
+};
+
+// ── State ────────────────────────────────────────────────────────────────────
+let selectedSource = 'google_maps';
+let currentJobId = null;
+let pollInterval = null;
+let allLeads = [];
+let filteredLeads = [];
+let currentPage = 1;
+let pageSize = 50;
+let sortField = '';
+let sortDir = 1;
+let activeFilters = {};
+let exportMenuOpen = false;
+
+// ── Init ─────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  buildSourceGrid();
+  selectSource('google_maps');
+  loadLeads();
+  loadStats();
+  checkApiStatus();
+});
+
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.export-wrap')) closeExport();
+});
+
+// ── Source grid ──────────────────────────────────────────────────────────────
+function buildSourceGrid() {
+  const grid = document.getElementById('sourceGrid');
+  grid.innerHTML = Object.entries(SOURCES).map(([key, s]) => `
+    <button class="source-btn" id="src-${key}" onclick="selectSource('${key}')">
+      <span class="source-icon">${s.icon}</span>
+      <div>
+        <div class="source-name">${s.name}</div>
+        <div class="source-method">${s.method}</div>
+      </div>
+    </button>
+  `).join('');
+}
+
+function selectSource(key) {
+  selectedSource = key;
+  document.querySelectorAll('.source-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(`src-${key}`)?.classList.add('active');
+  const tosNote = document.getElementById('tosNote');
+  const tosText = document.getElementById('tosText');
+  tosText.textContent = TOS_NOTES[key] || '';
+  tosNote.style.display = 'block';
+}
+
+// ── API Helpers ──────────────────────────────────────────────────────────────
+async function apiGet(path) {
+  const r = await fetch(API_BASE + path);
+  if (!r.ok) throw new Error(await r.text());
+  return r.json();
+}
+
+async function apiPost(path, body) {
+  const r = await fetch(API_BASE + path, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(body)
+  });
+  if (!r.ok) throw new Error(await r.text());
+  return r.json();
+}
+
+async function apiDelete(path) {
+  const r = await fetch(API_BASE + path, {method: 'DELETE'});
+  if (!r.ok) throw new Error(await r.text());
+  return r.json();
+}
+
+async function checkApiStatus() {
+  try {
+    await apiGet('/');
+    document.getElementById('apiStatus').textContent = 'API Connected';
+    document.getElementById('serverMode').textContent = 'Backend Live';
+  } catch {
+    document.getElementById('apiStatus').textContent = 'Demo Mode (no backend)';
+    document.getElementById('serverMode').textContent = 'Frontend Only';
+    useDemoMode();
+  }
+}
+
+// ── Demo Mode (when no backend) ──────────────────────────────────────────────
+let demoLeads = [];
+let demoStats = {total_leads:0, with_phone:0, with_email:0, by_source:{}};
+
+function useDemoMode() {
+  window._demoMode = true;
+  toast('Running in demo mode — backend not connected', 'error');
+}
+
+function generateDemoLeads(source, keyword, location, count) {
+  const leads = [];
+  const src = SOURCES[source];
+  for (let i = 0; i < count; i++) {
+    const hasEmail = Math.random() > 0.4;
+    const hasPhone = Math.random() > 0.1;
+    const hasRating = ['google_maps','justdial','sulekha'].includes(source);
+    leads.push({
+      id: String(Date.now() + i),
+      business_name: `${keyword.charAt(0).toUpperCase()+keyword.slice(1)} ${['Solutions','Services','Group','Hub','Pro'][i%5]} ${i+1}`,
+      company_name: source === 'indiamart' ? `${keyword} Industries ${i+1}` : '',
+      phone: hasPhone ? `+91 9${String(Math.floor(Math.random()*900000000+100000000))}` : '',
+      email: hasEmail ? `info${i}@${keyword.replace(/\s+/g,'')}.com` : '',
+      address: `${Math.floor(Math.random()*200)+1} Main Road, ${location}`,
+      website: Math.random()>0.5 ? `https://www.${keyword.replace(/\s+/g,'')}${i+1}.in` : '',
+      rating: hasRating ? (Math.random()*2+3).toFixed(1) : '',
+      source,
+      keyword,
+      location,
+      scraped_at: new Date().toISOString(),
+    });
+  }
+  return leads;
+}
+
+// ── Scraping ─────────────────────────────────────────────────────────────────
+async function startScraping() {
+  const keyword = document.getElementById('keyword').value.trim();
+  const location = document.getElementById('location').value.trim();
+  const maxResults = parseInt(document.getElementById('maxResults').value);
+
+  if (!keyword) { toast('Please enter a keyword', 'error'); return; }
+  if (!location) { toast('Please enter a location', 'error'); return; }
+
+  document.getElementById('scrapeBtn').disabled = true;
+  document.getElementById('cancelBtn').style.display = 'block';
+  document.getElementById('progressSection').classList.add('visible');
+  document.getElementById('logBox').innerHTML = '';
+  setProgress(0, 'queued', 'Queued...');
+
+  if (window._demoMode) {
+    await runDemoScraping(keyword, location, maxResults);
+    return;
+  }
+
+  try {
+    const res = await apiPost('/api/scrape/start', {
+      source: selectedSource,
+      keyword,
+      location,
+      max_results: maxResults,
+      filters: { min_rating: document.getElementById('minRating').value || null }
+    });
+    currentJobId = res.job_id;
+    toast(`Job started: ${res.job_id.slice(0,8)}...`, 'success');
+    pollInterval = setInterval(pollJob, 1500);
+  } catch(e) {
+    toast('Failed to start: ' + e.message, 'error');
+    resetScrapeUI();
+  }
+}
+
+async function runDemoScraping(keyword, location, count) {
+  // Simulate scraping with progress
+  setProgress(0, 'running', 'Connecting to source...');
+  addLog('⚠️ DEMO MODE — No backend connected');
+  addLog(`Starting ${SOURCES[selectedSource].name} scraper...`);
+
+  const steps = Math.min(count, 5);
+  const batchSize = Math.ceil(count / steps);
+
+  for (let i = 0; i < steps; i++) {
+    await sleep(800 + Math.random()*600);
+    if (currentJobId === 'CANCELLED') break;
+    const pct = Math.round(((i+1)/steps)*100);
+    setProgress(pct, 'running', `Scraping page ${i+1}/${steps}...`);
+    addLog(`Page ${i+1}: Extracted ${Math.min(batchSize*(i+1), count)} leads`);
+  }
+
+  if (currentJobId !== 'CANCELLED') {
+    const leads = generateDemoLeads(selectedSource, keyword, location, count);
+    demoLeads = [...leads, ...demoLeads];
+    allLeads = demoLeads;
+    demoStats.total_leads = demoLeads.length;
+    demoStats.with_phone = demoLeads.filter(l=>l.phone).length;
+    demoStats.with_email = demoLeads.filter(l=>l.email).length;
+
+    setProgress(100, 'done', `Complete. ${leads.length} leads extracted.`);
+    addLog(`✅ Done. ${leads.length} leads saved.`);
+    toast(`Extracted ${leads.length} leads successfully!`, 'success');
+    loadStats();
+    applyFilters();
+  }
+  resetScrapeUI();
+}
+
+async function pollJob() {
+  if (!currentJobId) return;
+  try {
+    const job = await apiGet(`/api/scrape/status/${currentJobId}`);
+    const { status, progress, message, leads_found, current_page, logs } = job;
+
+    setProgress(progress, status, message);
+    document.getElementById('leadsFound').textContent = leads_found || 0;
+    document.getElementById('currentPage').textContent = current_page || '-';
+
+    // Render new log entries
+    if (logs?.length) {
+      document.getElementById('logBox').innerHTML = logs.slice(-20).map(l =>
+        `<div class="log-entry"><span class="ts">${l.time.slice(11,19)}</span>${l.msg}</div>`
+      ).join('');
+      document.getElementById('logBox').scrollTop = 9999;
+    }
+
+    if (['done','error','cancelled'].includes(status)) {
+      clearInterval(pollInterval);
+      pollInterval = null;
+      if (status === 'done') {
+        toast(`Extraction complete! ${leads_found} leads found.`, 'success');
+        loadLeads();
+        loadStats();
+      } else if (status === 'error') {
+        toast('Scraping error: ' + (job.error || 'Unknown'), 'error');
+      }
+      resetScrapeUI();
+    }
+  } catch(e) {
+    // ignore transient errors
+  }
+}
+
+async function cancelScraping() {
+  if (window._demoMode) {
+    currentJobId = 'CANCELLED';
+    setProgress(0, 'cancelled', 'Cancelled.');
+    toast('Job cancelled.', 'error');
+    resetScrapeUI();
+    return;
+  }
+  if (currentJobId) {
+    try { await apiDelete(`/api/scrape/cancel/${currentJobId}`); } catch {}
+    clearInterval(pollInterval);
+    setProgress(0, 'cancelled', 'Cancelled by user.');
+    toast('Job cancelled.', 'error');
+    resetScrapeUI();
+  }
+}
+
+function resetScrapeUI() {
+  document.getElementById('scrapeBtn').disabled = false;
+  document.getElementById('cancelBtn').style.display = 'none';
+  currentJobId = null;
+}
+
+function setProgress(pct, status, msg) {
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressPct').textContent = pct + '%';
+  document.getElementById('progressMsg').textContent = msg || '';
+  const pill = document.getElementById('statusPill');
+  const icons = {running:'⚡',done:'✅',error:'❌',queued:'⏳',cancelled:'✕'};
+  const labels = {running:'Scraping',done:'Complete',error:'Error',queued:'Queued',cancelled:'Cancelled'};
+  pill.className = `status-pill ${status}`;
+  pill.textContent = `${icons[status]||'•'} ${labels[status]||status}`;
+}
+
+function addLog(msg) {
+  const box = document.getElementById('logBox');
+  const t = new Date().toTimeString().slice(0,8);
+  box.innerHTML += `<div class="log-entry"><span class="ts">${t}</span>${msg}</div>`;
+  box.scrollTop = 9999;
+}
+
+// ── Leads Table ──────────────────────────────────────────────────────────────
+async function loadLeads() {
+  if (window._demoMode) {
+    allLeads = demoLeads;
+    applyFilters();
+    return;
+  }
+  try {
+    const filters = buildFiltersQuery();
+    const data = await apiGet(`/api/leads?page=1&page_size=1000${filters}`);
+    allLeads = data.leads || [];
+    applyFilters();
+  } catch(e) {
+    // Backend not running — silent fail
+  }
+}
+
+function buildFiltersQuery() {
+  let q = '';
+  const name = document.getElementById('filterName').value.trim();
+  const src = document.getElementById('filterSource').value;
+  if (name) q += `&keyword=${encodeURIComponent(name)}`;
+  if (src)  q += `&source=${encodeURIComponent(src)}`;
+  if (activeFilters.has_email) q += `&has_email=true`;
+  if (activeFilters.has_phone) q += `&has_phone=true`;
+  return q;
+}
+
+function applyFilters() {
+  let leads = [...allLeads];
+  const name = document.getElementById('filterName').value.toLowerCase();
+  const src  = document.getElementById('filterSource').value;
+
+  if (name) leads = leads.filter(l =>
+    (l.business_name||l.company_name||'').toLowerCase().includes(name)
+  );
+  if (src) leads = leads.filter(l => l.source === src);
+  if (activeFilters.has_email) leads = leads.filter(l => l.email);
+  if (activeFilters.has_phone) leads = leads.filter(l => l.phone);
+
+  if (sortField) {
+    leads.sort((a,b) => {
+      const av = a[sortField]||'', bv = b[sortField]||'';
+      return String(av).localeCompare(String(bv), undefined, {numeric:true}) * sortDir;
+    });
+  }
+
+  filteredLeads = leads;
+  currentPage = 1;
+  renderTable();
+}
+
+function sortBy(field) {
+  if (sortField === field) sortDir *= -1;
+  else { sortField = field; sortDir = 1; }
+  applyFilters();
+}
+
+function renderTable() {
+  const total = filteredLeads.length;
+  const start = (currentPage-1)*pageSize;
+  const end   = Math.min(start+pageSize, total);
+  const page  = filteredLeads.slice(start, end);
+
+  document.getElementById('resultCount').textContent = `${total} record${total!==1?'s':''}`;
+
+  const empty = document.getElementById('emptyState');
+  const table = document.getElementById('leadsTable');
+  const tbody = document.getElementById('leadsBody');
+  const pag   = document.getElementById('pagination');
+
+  if (!total) {
+    empty.style.display = 'flex';
+    table.style.display = 'none';
+    pag.style.display = 'none';
+    return;
+  }
+
+  empty.style.display = 'none';
+  table.style.display = '';
+  pag.style.display = 'flex';
+
+  tbody.innerHTML = page.map(lead => {
+    const name = lead.business_name || lead.company_name || '—';
+    const src = lead.source || '';
+    const srcLabel = SOURCES[src]?.name || src;
+    const rating = lead.rating ? `<span class="rating">★ ${lead.rating}</span>` : '<span class="no-data">—</span>';
+    const phone = lead.phone ? `<span class="td-phone">${lead.phone}</span>` : '<span class="no-data">—</span>';
+    const email = lead.email ? `<span class="td-email">${lead.email}</span>` : '<span class="no-data">—</span>';
+    const addr = lead.address || '—';
+    return `<tr>
+      <td><div class="td-name" title="${name}">${name}</div>${lead.website?`<a href="${lead.website}" target="_blank" style="font-size:.65rem;color:var(--accent2);font-family:var(--mono)">${lead.website.replace('https://','').slice(0,30)}</a>`:''}</td>
+      <td>${phone}</td>
+      <td>${email}</td>
+      <td><div class="td-address" title="${addr}">${addr}</div></td>
+      <td>${rating}</td>
+      <td><span class="td-source ${src}">${srcLabel}</span></td>
+      <td><button class="btn-sm" style="font-size:.65rem;padding:4px 8px;color:var(--danger);border-color:var(--danger)" onclick="deleteLead('${lead.id}')">✕</button></td>
+    </tr>`;
+  }).join('');
+
+  // Pagination
+  document.getElementById('paginationInfo').textContent =
+    `Showing ${start+1}–${end} of ${total}`;
+
+  const totalPages = Math.ceil(total/pageSize);
+  const pages = [];
+  if (currentPage > 1) pages.push(`<button class="page-btn" onclick="goPage(${currentPage-1})">‹</button>`);
+  for (let p = Math.max(1,currentPage-2); p <= Math.min(totalPages,currentPage+2); p++) {
+    pages.push(`<button class="page-btn${p===currentPage?' active':''}" onclick="goPage(${p})">${p}</button>`);
+  }
+  if (currentPage < totalPages) pages.push(`<button class="page-btn" onclick="goPage(${currentPage+1})">›</button>`);
+  document.getElementById('pageBtns').innerHTML = pages.join('');
+}
+
+function goPage(p) { currentPage = p; renderTable(); }
+
+async function deleteLead(id) {
+  if (window._demoMode) {
+    demoLeads = demoLeads.filter(l => l.id !== id);
+    allLeads = demoLeads;
+    applyFilters();
+    return;
+  }
+  try {
+    await apiDelete(`/api/leads/${id}`);
+    allLeads = allLeads.filter(l => l.id !== id);
+    applyFilters();
+  } catch(e) { toast('Delete failed', 'error'); }
+}
+
+// ── Stats ────────────────────────────────────────────────────────────────────
+async function loadStats() {
+  let stats;
+  if (window._demoMode) {
+    stats = demoStats;
+  } else {
+    try { stats = await apiGet('/api/leads/stats'); } catch { return; }
+  }
+  document.getElementById('statTotal').textContent = stats.total_leads || 0;
+  document.getElementById('statPhone').textContent = stats.with_phone || 0;
+  document.getElementById('statEmail').textContent = stats.with_email || 0;
+  const t = stats.total_leads || 1;
+  document.getElementById('statPhonePct').textContent =
+    `${Math.round((stats.with_phone||0)/t*100)}% contact rate`;
+  document.getElementById('statEmailPct').textContent =
+    `${Math.round((stats.with_email||0)/t*100)}% email rate`;
+}
+
+// ── Filters ──────────────────────────────────────────────────────────────────
+function toggleFilter(elId, key) {
+  const el = document.getElementById(elId);
+  if (activeFilters[key]) {
+    delete activeFilters[key];
+    el.classList.remove('active');
+  } else {
+    activeFilters[key] = true;
+    el.classList.add('active');
+  }
+  applyFilters();
+}
+
+function clearFilters() {
+  document.getElementById('filterName').value = '';
+  document.getElementById('filterSource').value = '';
+  activeFilters = {};
+  document.getElementById('filterEmail').classList.remove('active');
+  document.getElementById('filterPhone').classList.remove('active');
+  applyFilters();
+}
+
+// ── Export ───────────────────────────────────────────────────────────────────
+function toggleExport() {
+  exportMenuOpen = !exportMenuOpen;
+  document.getElementById('exportMenu').classList.toggle('open', exportMenuOpen);
+}
+function closeExport() {
+  exportMenuOpen = false;
+  document.getElementById('exportMenu').classList.remove('open');
+}
+
+function exportLeads(fmt) {
+  closeExport();
+  if (window._demoMode) {
+    exportDemo(fmt);
+    return;
+  }
+  const src = document.getElementById('filterSource').value;
+  let url = `${API_BASE}/api/export?fmt=${fmt}`;
+  if (src) url += `&source=${encodeURIComponent(src)}`;
+  window.open(url, '_blank');
+  toast(`Downloading ${fmt.toUpperCase()}...`, 'success');
+}
+
+function exportDemo(fmt) {
+  const leads = filteredLeads.length ? filteredLeads : allLeads;
+  if (!leads.length) { toast('No leads to export', 'error'); return; }
+
+  const ts = new Date().toISOString().slice(0,19).replace(/[T:]/g,'-');
+  let content, type, ext;
+
+  if (fmt === 'json') {
+    content = JSON.stringify(leads, null, 2);
+    type = 'application/json'; ext = 'json';
+  } else if (fmt === 'csv') {
+    const keys = ['business_name','company_name','phone','email','address','website','rating','source','keyword','location','scraped_at'];
+    const rows = [keys.join(','), ...leads.map(l =>
+      keys.map(k => `"${String(l[k]||'').replace(/"/g,'""')}"`).join(',')
+    )];
+    content = rows.join('\n');
+    type = 'text/csv'; ext = 'csv';
+  } else {
+    toast('Excel export requires backend. Downloading CSV instead.', 'error');
+    exportDemo('csv'); return;
+  }
+
+  const blob = new Blob([content], {type});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `leads_${ts}.${ext}`;
+  a.click();
+  toast(`Exported ${leads.length} leads as ${ext.toUpperCase()}`, 'success');
+}
+
+// ── Toast ─────────────────────────────────────────────────────────────────────
+function toast(msg, type='success') {
+  const container = document.getElementById('toast');
+  const el = document.createElement('div');
+  el.className = `toast-item ${type}`;
+  el.innerHTML = `${type==='success'?'✓':'✕'} ${msg}`;
+  container.appendChild(el);
+  setTimeout(() => el.remove(), 4000);
+}
+
+// ── Utils ─────────────────────────────────────────────────────────────────────
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+</script>
+</body>
+</html>

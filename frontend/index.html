@@ -1,0 +1,1167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LeadGenerator ERP | Professional Lead Management</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <style>
+    :root {
+      --bg:        #0d0d1a;
+      --bg2:       #12122a;
+      --glass:     rgba(255,255,255,0.05);
+      --glass-b:   rgba(255,255,255,0.10);
+      --border:    rgba(255,255,255,0.08);
+      --border-h:  rgba(139,92,246,0.5);
+      --accent:    #8b5cf6;
+      --accent2:   #6366f1;
+      --accent3:   #a78bfa;
+      --success:   #10b981;
+      --info:      #38bdf8;
+      --danger:    #f43f5e;
+      --warning:   #f59e0b;
+      --text:      #e2e8f0;
+      --text-dim:  #94a3b8;
+      --text-mute: #64748b;
+    }
+
+    * { margin:0; padding:0; box-sizing:border-box; }
+
+    body {
+      background: var(--bg);
+      font-family: 'Inter', sans-serif;
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── Animated background ── */
+    body::before {
+      content:'';
+      position:fixed; inset:0;
+      background:
+        radial-gradient(ellipse 80% 60% at 20% 10%, rgba(139,92,246,0.18) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 50% at 80% 80%, rgba(99,102,241,0.15) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 40% at 50% 50%, rgba(167,139,250,0.06) 0%, transparent 70%);
+      pointer-events:none; z-index:0;
+      animation: bgPulse 8s ease-in-out infinite alternate;
+    }
+    @keyframes bgPulse {
+      from { opacity:1; }
+      to   { opacity:0.7; }
+    }
+
+    .app-wrap {
+      position:relative; z-index:1;
+      max-width:1440px; margin:0 auto;
+      padding:16px 20px;
+    }
+
+    /* ── GLASS CARD ── */
+    .card {
+      background: var(--glass);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      padding: 24px;
+      margin-bottom: 16px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4),
+                  inset 0 1px 0 rgba(255,255,255,0.07);
+      transition: border-color 0.3s;
+    }
+    .card:hover { border-color: var(--border-h); }
+
+    /* ── HEADER ── */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .logo { display:flex; align-items:center; gap:14px; }
+    .logo-icon {
+      width:44px; height:44px; border-radius:14px;
+      background: linear-gradient(135deg,#8b5cf6,#6366f1);
+      display:flex; align-items:center; justify-content:center;
+      font-size:20px; color:#fff;
+      box-shadow: 0 4px 20px rgba(139,92,246,0.5);
+    }
+    .logo h1 {
+      font-size: 22px; font-weight: 800; letter-spacing:-0.5px;
+      background: linear-gradient(135deg,#a78bfa,#818cf8);
+      -webkit-background-clip:text; background-clip:text; color:transparent;
+    }
+    .logo p { font-size:12px; color:var(--text-mute); }
+
+    .header-actions { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+
+    .status-badge {
+      display:inline-flex; align-items:center; gap:6px;
+      padding:6px 14px; border-radius:20px;
+      font-weight:600; font-size:12px; letter-spacing:0.3px;
+    }
+    .status-badge i { font-size:8px; }
+    .status-online  { background:rgba(16,185,129,0.15); color:#34d399; border:1px solid rgba(16,185,129,0.3); }
+    .status-offline { background:rgba(244,63,94,0.12);  color:#fb7185; border:1px solid rgba(244,63,94,0.25); }
+
+    /* ── BUTTONS ── */
+    .btn {
+      display:inline-flex; align-items:center; gap:8px;
+      padding:9px 20px; border-radius:12px;
+      font-weight:600; font-size:13px; font-family:'Inter',sans-serif;
+      border:none; cursor:pointer;
+      transition:all 0.2s ease;
+    }
+    .btn:active { transform:scale(0.97); }
+
+    .btn-primary {
+      background: linear-gradient(135deg,#8b5cf6,#6366f1);
+      color:#fff;
+      box-shadow: 0 4px 16px rgba(139,92,246,0.35);
+    }
+    .btn-primary:hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(139,92,246,0.5); }
+
+    .btn-success {
+      background: linear-gradient(135deg,#059669,#10b981);
+      color:#fff;
+      box-shadow: 0 4px 16px rgba(16,185,129,0.3);
+    }
+    .btn-success:hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(16,185,129,0.45); }
+
+    .btn-info {
+      background: linear-gradient(135deg,#0284c7,#38bdf8);
+      color:#fff;
+      box-shadow: 0 4px 16px rgba(56,189,248,0.3);
+    }
+    .btn-info:hover { transform:translateY(-2px); }
+
+    .btn-secondary {
+      background: rgba(255,255,255,0.07);
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+    }
+    .btn-secondary:hover { background:rgba(255,255,255,0.12); color:#fff; }
+
+    .btn-group { display:flex; gap:10px; flex-wrap:wrap; }
+
+    .hidden { display:none !important; }
+
+    /* ── FORM ── */
+    .form-grid {
+      display:grid;
+      grid-template-columns: repeat(auto-fit,minmax(240px,1fr));
+      gap:16px;
+      margin-bottom:20px;
+    }
+    .form-group { display:flex; flex-direction:column; gap:7px; }
+    .form-group label {
+      font-size:12px; font-weight:600; color:var(--text-dim);
+      text-transform:uppercase; letter-spacing:0.5px;
+    }
+    .form-group input,
+    .form-group select {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border);
+      border-radius:10px;
+      padding:11px 14px;
+      color:var(--text);
+      font-size:14px; font-family:'Inter',sans-serif;
+      transition: border-color 0.25s, box-shadow 0.25s;
+      outline:none;
+    }
+    .form-group input::placeholder { color:var(--text-mute); }
+    .form-group input:focus,
+    .form-group select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(139,92,246,0.18);
+      background: rgba(139,92,246,0.07);
+    }
+    .form-group select option { background:#1e1e3a; }
+
+    .source-grid {
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+      gap:12px;
+      margin-bottom:18px;
+    }
+    .source-chip {
+      display:flex; align-items:center; gap:10px;
+      padding:16px; border-radius:18px;
+      border:1px solid var(--border);
+      background:rgba(255,255,255,0.04);
+      color:var(--text);
+      cursor:pointer; transition:all 0.2s ease;
+      min-height:64px;
+    }
+    .source-chip:hover { border-color:var(--accent); background:rgba(139,92,246,0.14); }
+    .source-chip.active {
+      border-color:var(--accent);
+      background:rgba(139,92,246,0.18);
+      color:#fff;
+      box-shadow:0 10px 30px rgba(139,92,246,0.22);
+    }
+    .source-chip i { width:24px; text-align:center; font-size:18px; }
+    .source-chip span { font-size:13px; font-weight:700; }
+
+    .onboard-overlay {
+      display:none; position:fixed; inset:0;
+      background:rgba(8,10,26,0.94); z-index:9999;
+      align-items:center; justify-content:center;
+      padding:20px;
+    }
+    .onboard-overlay.active { display:flex; }
+    .onboard-card {
+      width:min(560px,100%);
+      background:rgba(255,255,255,0.06);
+      border:1px solid rgba(255,255,255,0.1);
+      border-radius:26px;
+      padding:28px;
+      box-shadow:0 30px 80px rgba(0,0,0,0.55);
+    }
+    .onboard-card h3 { margin-bottom:8px; }
+    .onboard-card p { color:var(--text-dim); margin-bottom:24px; }
+
+    /* ── AUTH CARD ── */
+    .auth-wrap {
+      min-height:100vh;
+      display:flex; align-items:center; justify-content:center;
+      padding:24px;
+    }
+    .auth-card {
+      width:100%; max-width:480px;
+      padding:40px;
+    }
+    .auth-header { text-align:center; margin-bottom:32px; }
+    .auth-logo-big {
+      width:64px; height:64px; border-radius:20px;
+      background:linear-gradient(135deg,#8b5cf6,#6366f1);
+      display:flex; align-items:center; justify-content:center;
+      font-size:28px; color:#fff; margin:0 auto 16px;
+      box-shadow:0 8px 32px rgba(139,92,246,0.4);
+      animation: floatLogo 3s ease-in-out infinite;
+    }
+    @keyframes floatLogo {
+      0%,100% { transform:translateY(0); }
+      50%      { transform:translateY(-6px); }
+    }
+    .auth-header h2 {
+      font-size:26px; font-weight:800;
+      background:linear-gradient(135deg,#a78bfa,#818cf8);
+      -webkit-background-clip:text; background-clip:text; color:transparent;
+      margin-bottom:6px;
+    }
+    .auth-header p { font-size:13px; color:var(--text-mute); }
+
+    /* Login tabs */
+    .login-tabs { display:flex; gap:8px; margin-bottom:22px; }
+    .login-tab {
+      flex:1; display:flex; align-items:center; justify-content:center;
+      gap:8px; padding:10px 14px; border-radius:12px; cursor:pointer;
+      font-size:13px; font-weight:600; font-family:'Inter',sans-serif;
+      border:1px solid var(--border);
+      background:rgba(255,255,255,0.04);
+      color:var(--text-dim);
+      transition:all 0.25s;
+    }
+    .login-tab.active {
+      background:linear-gradient(135deg,rgba(139,92,246,0.2),rgba(99,102,241,0.2));
+      border-color:var(--accent);
+      color:#fff;
+      box-shadow:0 0 0 1px var(--accent);
+    }
+    .login-tab:hover:not(.active) { background:rgba(255,255,255,0.08); color:#fff; }
+
+    .auth-btn {
+      width:100%; padding:14px; border-radius:12px;
+      background:linear-gradient(135deg,#8b5cf6,#6366f1);
+      color:#fff; font-size:15px; font-weight:700;
+      font-family:'Inter',sans-serif;
+      border:none; cursor:pointer;
+      box-shadow:0 8px 24px rgba(139,92,246,0.4);
+      transition:all 0.25s;
+      margin-top:8px;
+    }
+    .auth-btn:hover { transform:translateY(-2px); box-shadow:0 12px 32px rgba(139,92,246,0.55); }
+    .auth-btn:active { transform:scale(0.98); }
+
+    #authMessage {
+      min-height:22px; margin-top:14px; font-size:13px;
+      font-weight:500; text-align:center;
+      transition:color 0.2s;
+    }
+
+    /* ── MAIN APP LAYOUT ── */
+    .app-layout {
+      display:flex;
+      gap:16px;
+      align-items:flex-start;
+    }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width:220px; flex-shrink:0;
+      position:sticky; top:16px;
+    }
+    .sidebar-brand {
+      text-align:center; padding:20px 16px 24px;
+      border-bottom:1px solid var(--border); margin-bottom:8px;
+    }
+    .sidebar-brand .s-icon {
+      width:44px; height:44px; border-radius:14px;
+      background:linear-gradient(135deg,#8b5cf6,#6366f1);
+      display:flex; align-items:center; justify-content:center;
+      font-size:20px; color:#fff; margin:0 auto 10px;
+      box-shadow:0 4px 16px rgba(139,92,246,0.5);
+    }
+    .sidebar-brand h2 {
+      font-size:14px; font-weight:700;
+      background:linear-gradient(135deg,#a78bfa,#818cf8);
+      -webkit-background-clip:text; background-clip:text; color:transparent;
+    }
+    .sidebar-brand p { font-size:10px; color:var(--text-mute); margin-top:2px; }
+
+    .nav-item {
+      display:flex; align-items:center; gap:12px;
+      padding:11px 16px; border-radius:12px;
+      cursor:pointer; font-size:13px; font-weight:600;
+      color:var(--text-dim);
+      transition:all 0.2s;
+      margin-bottom:3px;
+      border:1px solid transparent;
+    }
+    .nav-item i { width:18px; text-align:center; font-size:14px; }
+    .nav-item:hover { background:rgba(255,255,255,0.06); color:var(--text); }
+    .nav-item.active {
+      background:linear-gradient(135deg,rgba(139,92,246,0.2),rgba(99,102,241,0.15));
+      color:#a78bfa;
+      border-color:rgba(139,92,246,0.25);
+      box-shadow:inset 0 0 0 1px rgba(139,92,246,0.15);
+    }
+    .nav-item.active i { color:#8b5cf6; }
+
+    .sidebar-footer {
+      padding-top:16px; border-top:1px solid var(--border); margin-top:8px;
+    }
+
+    /* ── MAIN CONTENT ── */
+    .main-content { flex:1; min-width:0; }
+
+    /* ── TOPBAR ── */
+    .topbar {
+      display:flex; align-items:center; justify-content:space-between;
+      gap:12px; flex-wrap:wrap;
+    }
+    .topbar-title { font-size:22px; font-weight:800; color:var(--text); }
+    .topbar-title span {
+      background:linear-gradient(135deg,#a78bfa,#818cf8);
+      -webkit-background-clip:text; background-clip:text; color:transparent;
+    }
+    .topbar-right { display:flex; align-items:center; gap:10px; }
+    .user-chip {
+      display:flex; align-items:center; gap:8px;
+      padding:6px 14px 6px 6px; border-radius:20px;
+      background:rgba(255,255,255,0.06); border:1px solid var(--border);
+      font-size:13px; font-weight:500; color:var(--text);
+    }
+    .user-chip .avatar {
+      width:28px; height:28px; border-radius:50%;
+      background:linear-gradient(135deg,#8b5cf6,#6366f1);
+      display:flex; align-items:center; justify-content:center;
+      font-size:12px; font-weight:700; color:#fff;
+    }
+
+    /* ── PAGE SECTIONS ── */
+    .page-section { display:none; animation:fadeUp 0.3s ease; }
+    .page-section.active { display:block; }
+    @keyframes fadeUp {
+      from { opacity:0; transform:translateY(12px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+
+    /* ── HOME CARDS ── */
+    .stat-grid {
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+      gap:14px; margin-bottom:16px;
+    }
+    .stat-card {
+      border-radius:20px; padding:22px;
+      position:relative; overflow:hidden;
+      cursor:pointer; transition:transform 0.25s, box-shadow 0.25s;
+    }
+    .stat-card:hover { transform:translateY(-4px); box-shadow:0 16px 40px rgba(0,0,0,0.4); }
+    .stat-card::before {
+      content:''; position:absolute; inset:0;
+      background:inherit; border-radius:inherit;
+      opacity:0; transition:opacity 0.2s;
+    }
+    .stat-card:hover::before { opacity:0.08; }
+    .sc-1 { background:linear-gradient(135deg,rgba(139,92,246,0.2),rgba(99,102,241,0.1)); border:1px solid rgba(139,92,246,0.3); }
+    .sc-2 { background:linear-gradient(135deg,rgba(16,185,129,0.18),rgba(5,150,105,0.08)); border:1px solid rgba(16,185,129,0.3); }
+    .sc-3 { background:linear-gradient(135deg,rgba(56,189,248,0.18),rgba(2,132,199,0.08)); border:1px solid rgba(56,189,248,0.3); }
+    .stat-card i { font-size:28px; margin-bottom:12px; display:block; }
+    .sc-1 i { color:#a78bfa; }
+    .sc-2 i { color:#34d399; }
+    .sc-3 i { color:#38bdf8; }
+    .stat-card h3 { font-size:14px; font-weight:700; margin-bottom:4px; }
+    .stat-card p  { font-size:12px; color:var(--text-dim); line-height:1.5; }
+
+    /* ── SECTION HEADING ── */
+    .section-heading {
+      display:flex; align-items:center; gap:10px;
+      font-size:16px; font-weight:800; margin-bottom:18px; color:var(--text);
+    }
+    .section-heading::before {
+      content:''; width:4px; height:18px; border-radius:2px;
+      background:linear-gradient(180deg,#8b5cf6,#6366f1);
+    }
+
+    /* ── TABLE ── */
+    .table-container { overflow-x:auto; border-radius:12px; }
+    table { width:100%; border-collapse:collapse; }
+    thead tr { background:rgba(139,92,246,0.08); }
+    th {
+      text-align:left; padding:13px 14px;
+      font-size:11px; font-weight:700; text-transform:uppercase;
+      letter-spacing:0.6px; color:var(--text-mute);
+      border-bottom:1px solid var(--border);
+      white-space:nowrap;
+    }
+    td {
+      padding:12px 14px;
+      border-bottom:1px solid rgba(255,255,255,0.04);
+      font-size:13px; color:var(--text);
+    }
+    tbody tr { transition:background 0.15s; }
+    tbody tr:hover { background:rgba(139,92,246,0.07); }
+    td a { color:#818cf8; text-decoration:none; }
+    td a:hover { color:#a78bfa; text-decoration:underline; }
+
+    .table-actions {
+      display:flex; gap:10px; flex-wrap:wrap; margin-bottom:18px;
+    }
+
+    /* ── EMPTY STATE ── */
+    .empty-state {
+      text-align:center; padding:60px 20px;
+      color:var(--text-mute);
+    }
+    .empty-state i { font-size:52px; margin-bottom:16px; display:block; opacity:0.4; }
+    .empty-state p { font-size:14px; }
+
+    /* ── SETTINGS SECTIONS ── */
+    .settings-grid { display:grid; gap:20px; }
+    .settings-section {
+      background:rgba(255,255,255,0.03);
+      border:1px solid var(--border);
+      border-radius:16px; padding:22px;
+    }
+    .settings-section h3 {
+      font-size:14px; font-weight:700; margin-bottom:16px;
+      display:flex; align-items:center; gap:8px; color:var(--text);
+    }
+    .settings-section h3 i { color:var(--accent); }
+
+    /* ── SPINNER ── */
+    .loading-overlay {
+      display:none; position:fixed; inset:0;
+      background:rgba(0,0,0,0.7); backdrop-filter:blur(4px);
+      z-index:9999; align-items:center; justify-content:center;
+      flex-direction:column; gap:16px;
+    }
+    .spinner {
+      width:50px; height:50px; border-radius:50%;
+      border:3px solid rgba(139,92,246,0.2);
+      border-top:3px solid #8b5cf6;
+      animation:spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    .loading-overlay p { color:#a78bfa; font-weight:600; font-size:14px; }
+
+    /* ── SOURCE BADGE ── */
+    .badge {
+      display:inline-flex; align-items:center; gap:4px;
+      padding:3px 10px; border-radius:20px; font-size:11px; font-weight:600;
+    }
+    .badge-maps  { background:rgba(56,189,248,0.15); color:#38bdf8; }
+    .badge-goodfirm { background:rgba(168,85,247,0.15); color:#c084fc; }
+    .badge-india { background:rgba(251,146,60,0.15); color:#fb923c; }
+    .badge-zoho  { background:rgba(167,139,250,0.15); color:#a78bfa; }
+
+    /* ── HELPER TEXT ── */
+    .helper-text { font-size:13px; color:var(--text-dim); line-height:1.6; }
+
+    /* ── CARD TITLE ── */
+    .card-title {
+      display:flex; align-items:center; gap:10px;
+      font-size:18px; font-weight:800; margin-bottom:20px; color:var(--text);
+    }
+    .card-title i { color:var(--accent); }
+
+    /* responsive */
+    @media (max-width:768px) {
+      .app-layout { flex-direction:column; }
+      .sidebar { width:100%; position:static; }
+      .sidebar { display:flex; flex-wrap:wrap; gap:4px; }
+      .sidebar-brand { display:none; }
+      .sidebar-footer { display:none; }
+      .nav-item { flex:1; min-width:80px; flex-direction:column; gap:4px; font-size:11px; padding:8px 6px; }
+      .nav-item i { width:auto; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="loading-overlay" id="loading">
+  <div class="spinner"></div>
+  <p>Processing...</p>
+</div>
+
+<!-- ══════════════ AUTH SCREEN ══════════════ -->
+<div id="authScreen" class="auth-wrap">
+  <div class="card auth-card">
+    <div class="auth-header">
+      <div class="auth-logo-big"><i class="fas fa-bolt"></i></div>
+      <h2>LeadGenerator ERP</h2>
+      <p>Sign in to manage and scrape leads</p>
+    </div>
+
+    <!-- Login Type Tabs -->
+    <div class="login-tabs">
+      <button id="tabEmail" class="login-tab active" onclick="switchLoginTab('email')">
+        <i class="fas fa-envelope"></i> Email
+      </button>
+      <button id="tabPhone" class="login-tab" onclick="switchLoginTab('phone')">
+        <i class="fas fa-mobile-alt"></i> Mobile
+      </button>
+    </div>
+
+    <div class="form-grid" style="grid-template-columns:1fr; gap:14px;">
+      <div id="emailField" class="form-group">
+        <label for="loginEmail">Email Address</label>
+        <input id="loginEmail" type="email" placeholder="you@example.com">
+      </div>
+      <div id="phoneField" class="form-group hidden">
+        <label for="loginPhone">Mobile Number</label>
+        <input id="loginPhone" type="tel" placeholder="+919876543210">
+      </div>
+      <div class="form-group">
+        <label for="loginPassword">Password</label>
+        <input id="loginPassword" type="password" placeholder="Enter your password">
+      </div>
+      <div class="form-group">
+        <label for="dbServer">SQL Server Instance</label>
+        <input id="dbServer" type="text" value="ADMIN\\SQLEXPRESS">
+      </div>
+      <div class="form-group">
+        <label for="dbName">Database Name</label>
+        <input id="dbName" type="text" value="leads_db">
+      </div>
+    </div>
+
+    <button class="auth-btn" onclick="loginUser()">
+      <i class="fas fa-sign-in-alt"></i> &nbsp; Sign In
+    </button>
+    <div id="authMessage"></div>
+  </div>
+</div>
+
+<div id="profileOnboard" class="onboard-overlay hidden">
+  <div class="onboard-card card">
+    <div class="card-title"><i class="fas fa-user-circle"></i> Complete Your Profile</div>
+    <p>Tell us your full name and birthdate so the dashboard can welcome you properly.</p>
+    <div class="form-grid">
+      <div class="form-group">
+        <label for="onboardFullName">Full Name</label>
+        <input id="onboardFullName" type="text" placeholder="Your full name">
+      </div>
+      <div class="form-group">
+        <label for="onboardBirthdate">Birthdate</label>
+        <input id="onboardBirthdate" type="date" placeholder="YYYY-MM-DD">
+      </div>
+    </div>
+    <div class="btn-group" style="justify-content:flex-end; gap:12px; margin-top:10px;">
+      <button class="btn btn-secondary" onclick="cancelProfileOnboarding()"><i class="fas fa-times"></i> Later</button>
+      <button class="btn btn-primary" onclick="submitProfileOnboarding()"><i class="fas fa-save"></i> Save Profile</button>
+    </div>
+    <p id="onboardMessage" class="helper-text" style="margin-top:16px;"></p>
+  </div>
+</div>
+
+<!-- ══════════════ MAIN APP ══════════════ -->
+<div id="appContainer" class="hidden">
+  <div class="app-wrap">
+    <div class="app-layout">
+
+      <!-- SIDEBAR -->
+      <nav class="card sidebar">
+        <div class="sidebar-brand">
+          <div class="s-icon"><i class="fas fa-bolt"></i></div>
+          <h2>LeadGenerator</h2>
+          <p>ERP Platform</p>
+        </div>
+
+        <div id="homeTab"     class="nav-item active"  onclick="switchPage('home')">     <i class="fas fa-home"></i>     Dashboard </div>
+        <div id="scraperTab"  class="nav-item"          onclick="switchPage('scraper')">  <i class="fas fa-rocket"></i>   Scraper   </div>
+        <div id="leadsTab"    class="nav-item"          onclick="switchPage('leads')">    <i class="fas fa-database"></i>  Leads     </div>
+        <div id="settingsTab" class="nav-item"          onclick="switchPage('settings')"> <i class="fas fa-cog"></i>       Settings  </div>
+
+        <div class="sidebar-footer">
+          <div class="nav-item" onclick="logoutUser()" style="color:var(--danger);">
+            <i class="fas fa-sign-out-alt"></i> Sign Out
+          </div>
+        </div>
+      </nav>
+
+      <!-- CONTENT -->
+      <div class="main-content">
+        <!-- Topbar -->
+        <div class="card topbar" style="margin-bottom:16px;">
+          <div>
+            <div class="topbar-title">Welcome back, <span id="userWelcome">Lead Manager</span> 👋</div>
+            <div class="helper-text" style="margin-top:3px;">Manage your leads pipeline from one place.</div>
+          </div>
+          <div class="topbar-right">
+            <span id="connectionStatus" class="status-badge status-offline">
+              <i class="fas fa-circle"></i> Not Connected
+            </span>
+            <button id="logoutBtn" class="btn btn-secondary hidden" onclick="logoutUser()">
+              <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+          </div>
+        </div>
+
+        <!-- ── HOME PAGE ── -->
+        <div id="homePage" class="page-section active">
+          <div class="stat-grid">
+            <div class="stat-card sc-1" onclick="switchPage('scraper')">
+              <i class="fas fa-rocket"></i>
+              <h3>Scraper</h3>
+              <p>Scrape leads from Google Maps, IndiaMart, and Zoho Partners.</p>
+            </div>
+            <div class="stat-card sc-2" onclick="switchPage('leads')">
+              <i class="fas fa-database"></i>
+              <h3>Leads Database</h3>
+              <p>View, search, and export all stored leads from your database.</p>
+            </div>
+            <div class="stat-card sc-3" onclick="switchPage('settings')">
+              <i class="fas fa-shield-alt"></i>
+              <h3>Security</h3>
+              <p>Password-based login with secure session tokens.</p>
+            </div>
+          </div>
+          <div class="card" style="margin-bottom:0;">
+            <div class="card-title"><i class="fas fa-lightning-bolt fas fa-bolt"></i> Quick Actions</div>
+            <div class="btn-group">
+              <button class="btn btn-primary"   onclick="switchPage('scraper')"><i class="fas fa-rocket"></i>  Run Scraper</button>
+              <button class="btn btn-success"   onclick="switchPage('leads')">  <i class="fas fa-eye"></i>     View Leads</button>
+              <button class="btn btn-secondary" onclick="switchPage('settings')"><i class="fas fa-cog"></i>    Settings</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── SCRAPER PAGE ── -->
+        <div id="scraperPage" class="page-section">
+          <div class="card">
+            <div class="card-title"><i class="fas fa-rocket"></i> Scraper Configuration</div>
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="source">Data Source</label>
+                <select id="source" onchange="selectSource(this.value)">
+                  <option value="google_maps">🗺 Google Maps</option>
+                  <option value="goodfirm">💎 GoodFirm</option>
+                  <option value="indiamart">🏭 IndiaMart</option>
+                  <option value="zoho_partner">☁ Zoho Partners</option>
+                </select>
+              </div>
+              <div class="source-grid" style="grid-column:1/-1;">
+                <div class="source-chip active" data-source="google_maps" onclick="selectSource('google_maps')">
+                  <i class="fas fa-map-marked-alt"></i><span>Google Maps</span>
+                </div>
+                <div class="source-chip" data-source="goodfirm" onclick="selectSource('goodfirm')">
+                  <i class="fas fa-gem"></i><span>GoodFirm</span>
+                </div>
+                <div class="source-chip" data-source="indiamart" onclick="selectSource('indiamart')">
+                  <i class="fas fa-industry"></i><span>IndiaMart</span>
+                </div>
+                <div class="source-chip" data-source="zoho_partner" onclick="selectSource('zoho_partner')">
+                  <i class="fas fa-cloud"></i><span>Zoho Partners</span>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="sector">Keyword / Sector</label>
+                <input id="sector" type="text" placeholder="e.g. restaurants, software firms">
+              </div>
+              <div class="form-group">
+                <label for="city">Location / City</label>
+                <input id="city" type="text" placeholder="e.g. Mumbai, Delhi">
+              </div>
+              <div class="form-group">
+                <label for="dataAmount">Number of Leads</label>
+                <input id="dataAmount" type="number" min="1" value="20">
+              </div>
+              <div class="form-group">
+                <label for="scrapeDbServer">SQL Server Instance</label>
+                <input id="scrapeDbServer" type="text" value="ADMIN\\SQLEXPRESS">
+              </div>
+              <div class="form-group">
+                <label for="scrapeDbName">Database Name</label>
+                <input id="scrapeDbName" type="text" value="leads_db">
+              </div>
+            </div>
+            <div class="btn-group">
+              <button class="btn btn-primary"   id="scrapeBtn" onclick="startScraping()"><i class="fas fa-rocket"></i>  Run Scraper</button>
+              <button class="btn btn-secondary"                onclick="testConnection()"><i class="fas fa-server"></i>  Test DB</button>
+            </div>
+            <p id="scrapeStatus" class="helper-text" style="margin-top:14px;">
+              Configure your scraper above, then click Run Scraper to start collecting leads.
+            </p>
+          </div>
+        </div>
+
+        <!-- ── LEADS PAGE ── -->
+        <div id="leadsPage" class="page-section">
+          <div class="card">
+            <div class="card-title"><i class="fas fa-database"></i> Leads Database</div>
+            <div class="table-actions">
+              <button class="btn btn-info"      onclick="viewLeads()">        <i class="fas fa-sync-alt"></i>   Reload</button>
+              <button class="btn btn-success"   onclick="exportLeads('csv')"> <i class="fas fa-file-csv"></i>   Export CSV</button>
+              <button class="btn btn-secondary" onclick="exportLeads('excel')"><i class="fas fa-file-excel"></i> Export XLS</button>
+            </div>
+            <div id="leadsTable">
+              <div class="empty-state">
+                <i class="fas fa-database"></i>
+                <p>No leads loaded yet. Use the Scraper to fetch leads.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── SETTINGS PAGE ── -->
+        <div id="settingsPage" class="page-section">
+          <div class="card">
+            <div class="card-title"><i class="fas fa-cog"></i> Account Settings</div>
+            <div class="settings-grid">
+              <div class="settings-section">
+                <h3><i class="fas fa-address-card"></i> Contact Info</h3>
+                <div class="form-grid">
+                  <div class="form-group">
+                    <label for="settingsEmail">Email</label>
+                    <input id="settingsEmail" type="email" placeholder="your.email@example.com">
+                  </div>
+                  <div class="form-group">
+                    <label for="settingsPhone">Mobile</label>
+                    <input id="settingsPhone" type="tel" placeholder="+919876543210">
+                  </div>
+                </div>
+                <button class="btn btn-primary" onclick="saveProfile()"><i class="fas fa-save"></i> Save</button>
+              </div>
+              <div class="settings-section">
+                <h3><i class="fas fa-lock"></i> Change Password</h3>
+                <div class="form-grid">
+                  <div class="form-group">
+                    <label for="currentPassword">Current Password</label>
+                    <input id="currentPassword" type="password" placeholder="Old password">
+                  </div>
+                  <div class="form-group">
+                    <label for="newPassword">New Password</label>
+                    <input id="newPassword" type="password" placeholder="New password">
+                  </div>
+                </div>
+                <button class="btn btn-success" onclick="changePassword()"><i class="fas fa-key"></i> Update Password</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /main-content -->
+    </div><!-- /app-layout -->
+  </div><!-- /app-wrap -->
+</div><!-- /appContainer -->
+
+<script>
+  const API_BASE_URL = "http://127.0.0.1:5000";
+  let sessionToken = null;
+  let currentUser  = null;
+  let currentPage  = 'home';
+  let activeLoginTab = 'email';
+  let currentSource = 'google_maps';
+
+  /* ─── Helpers ─── */
+  function getAuthHeaders() {
+    const h = { 'Content-Type': 'application/json' };
+    if (sessionToken) h['Authorization'] = `Bearer ${sessionToken}`;
+    return h;
+  }
+  function showAuthMessage(msg, isError=false) {
+    const el = document.getElementById('authMessage');
+    if (!el) return;
+    el.textContent = msg;
+    el.style.color = isError ? '#f87171' : '#34d399';
+  }
+  function showLoading(active) {
+    document.getElementById('loading').style.display = active ? 'flex' : 'none';
+  }
+
+  function showProfileOnboard(show) {
+    const overlay = document.getElementById('profileOnboard');
+    overlay.classList.toggle('active', show);
+    overlay.classList.toggle('hidden', !show);
+  }
+
+  function updateWelcomeName() {
+    if (!currentUser) return;
+    const name = currentUser.display_name || currentUser.email || currentUser.phone || 'Lead Manager';
+    document.getElementById('userWelcome').textContent = name;
+  }
+
+  function selectSource(source) {
+    currentSource = source;
+    document.getElementById('source').value = source;
+    document.querySelectorAll('.source-chip').forEach(el => {
+      el.classList.toggle('active', el.dataset.source === source);
+    });
+  }
+
+  function cancelProfileOnboarding() {
+    showProfileOnboard(false);
+    document.getElementById('onboardMessage').textContent = 'You can complete your profile later from settings.';
+  }
+
+  async function submitProfileOnboarding() {
+    const fullName = document.getElementById('onboardFullName').value.trim();
+    const birthdate = document.getElementById('onboardBirthdate').value;
+    const db_server = document.getElementById('dbServer').value.trim() || 'ADMIN\\SQLEXPRESS';
+    const db_name = document.getElementById('dbName').value.trim() || 'leads_db';
+    const messageEl = document.getElementById('onboardMessage');
+
+    if (!fullName || !birthdate) {
+      messageEl.textContent = 'Please provide both full name and birthdate.';
+      return;
+    }
+    messageEl.textContent = 'Saving profile...';
+    try {
+      const resp = await fetch(`${API_BASE_URL}/auth/profile`, {
+        method:'POST', headers:getAuthHeaders(),
+        body:JSON.stringify({ full_name: fullName, birthdate, db_server, db_name })
+      });
+      const result = await resp.json();
+      if (!resp.ok || result.error) {
+        messageEl.textContent = result.error || 'Unable to save profile.';
+        return;
+      }
+      currentUser.display_name = result.display_name || fullName.split(' ')[0];
+      currentUser.email = result.email || currentUser.email;
+      currentUser.phone = result.phone || currentUser.phone;
+      currentUser.profile_required = result.profile_required;
+      updateWelcomeName();
+      messageEl.textContent = 'Profile saved successfully.';
+      showProfileOnboard(false);
+      switchPage('home');
+      Swal.fire('Profile Saved','Your profile has been updated successfully.','success');
+    } catch(e) {
+      messageEl.textContent = e.message || 'Save failed.';
+    }
+  }
+
+  /* ─── Auth state ─── */
+  function setLoggedIn(loggedIn) {
+    document.getElementById('authScreen').style.display  = loggedIn ? 'none'  : 'flex';
+    document.getElementById('appContainer').classList.toggle('hidden', !loggedIn);
+    document.getElementById('logoutBtn').classList.toggle('hidden', !loggedIn);
+    const s = document.getElementById('connectionStatus');
+    if (loggedIn) {
+      s.className = 'status-badge status-online';
+      s.innerHTML = '<i class="fas fa-circle"></i> Connected';
+    } else {
+      s.className = 'status-badge status-offline';
+      s.innerHTML = '<i class="fas fa-circle"></i> Not Connected';
+    }
+  }
+  function logoutUser() {
+    sessionToken = null; currentUser = null;
+    setLoggedIn(false);
+    showAuthMessage('Logged out. Please sign in again.');
+  }
+
+  /* ─── Login tab ─── */
+  function switchLoginTab(tab) {
+    activeLoginTab = tab;
+    const isEmail = tab === 'email';
+    document.getElementById('emailField').classList.toggle('hidden', !isEmail);
+    document.getElementById('phoneField').classList.toggle('hidden', isEmail);
+    document.getElementById('tabEmail').classList.toggle('active', isEmail);
+    document.getElementById('tabPhone').classList.toggle('active', !isEmail);
+  }
+
+  /* ─── Page navigation ─── */
+  function switchPage(page) {
+    currentPage = page;
+    ['home','scraper','leads','settings'].forEach(k => {
+      document.getElementById(k+'Page')?.classList.toggle('active', k===page);
+      document.getElementById(k+'Tab')?.classList.toggle('active', k===page);
+    });
+    if (page === 'settings') populateSettings();
+    if (page === 'leads')    viewLeads();
+  }
+
+  /* ─── Login ─── */
+  async function loginUser() {
+    const isEmail = activeLoginTab === 'email';
+    const identifier = isEmail
+      ? document.getElementById('loginEmail').value.trim()
+      : document.getElementById('loginPhone').value.trim();
+    const password = document.getElementById('loginPassword').value.trim();
+    const dbServer = document.getElementById('dbServer').value.trim() || 'ADMIN\\SQLEXPRESS';
+    const dbName   = document.getElementById('dbName').value.trim()   || 'leads_db';
+
+    if (!identifier || !password) {
+      showAuthMessage(`Please enter your ${isEmail?'email':'mobile number'} and password.`, true);
+      return;
+    }
+    showAuthMessage('Logging in...');
+
+    const payload = { db_server: dbServer, db_name: dbName, password };
+    if (isEmail) payload.email = identifier;
+    else         payload.phone = identifier;
+
+    try {
+      const resp = await fetch(`${API_BASE_URL}/auth/login`, {
+        method:'POST', headers: getAuthHeaders(),
+        body: JSON.stringify(payload)
+      });
+      let data;
+      try { data = await resp.json(); }
+      catch { throw new Error(await resp.text() || 'Invalid server response'); }
+
+      if (!resp.ok) { showAuthMessage(data.error || data.message || 'Login failed.', true); return; }
+
+      if (data.token) {
+        sessionToken = data.token;
+        currentUser  = {
+          email: data.email,
+          phone: data.phone,
+          is_superadmin: data.is_superadmin,
+          display_name: data.display_name,
+          profile_required: data.profile_required
+        };
+        updateWelcomeName();
+        setLoggedIn(true);
+        if (data.profile_required) {
+          showProfileOnboard(true);
+          if (data.full_name) document.getElementById('onboardFullName').value = data.full_name;
+          if (data.birthdate) document.getElementById('onboardBirthdate').value = data.birthdate;
+          return;
+        }
+        if (currentUser.is_superadmin) loadAdminStats();
+        switchPage('home');
+        return;
+      }
+      showAuthMessage(data.error || data.message || 'Login failed.', true);
+    } catch(e) { showAuthMessage(e.message || 'Login failed.', true); }
+  }
+
+  /* ─── Scrape ─── */
+  async function startScraping() {
+    if (!sessionToken) { Swal.fire('Authentication Required','Please login first.','warning'); return; }
+    const source     = currentSource || document.getElementById('source').value;
+    const keyword    = document.getElementById('sector').value.trim();
+    const location   = document.getElementById('city').value.trim();
+    const max_results= parseInt(document.getElementById('dataAmount').value,10);
+    const db_server  = document.getElementById('scrapeDbServer').value.trim() || 'ADMIN\\SQLEXPRESS';
+    const db_name    = document.getElementById('scrapeDbName').value.trim()   || 'leads_db';
+
+    if (!keyword||!location||!max_results) {
+      Swal.fire('Validation Error','Please fill in keyword, location, and number of leads.','error'); return;
+    }
+    showLoading(true);
+    document.getElementById('scrapeStatus').textContent = 'Scraping started...';
+    document.getElementById('scrapeBtn').disabled = true;
+
+    try {
+      const resp = await fetch(`${API_BASE_URL}/scrape`,{
+        method:'POST', headers:getAuthHeaders(),
+        body:JSON.stringify({source,keyword,location,max_results,db_server,db_name})
+      });
+      const result = await resp.json();
+      if (!resp.ok||result.error) {
+        document.getElementById('scrapeStatus').textContent='Scraping failed.';
+        Swal.fire('Error',result.error||result.message||'Scraping failed','error'); return;
+      }
+      const count = Array.isArray(result.data)?result.data.length:0;
+      document.getElementById('scrapeStatus').textContent=`✅ Scraped ${count} leads — saved to database.`;
+      Swal.fire('Success 🎉',`Scraped ${count} leads successfully.`,'success');
+      renderLeads(result.data||[]);
+      switchPage('leads');
+    } catch(e) {
+      document.getElementById('scrapeStatus').textContent='Backend connection error.';
+      Swal.fire('Error',`Cannot reach backend: ${e.message}`,'error');
+    } finally {
+      showLoading(false);
+      document.getElementById('scrapeBtn').disabled=false;
+    }
+  }
+
+  /* ─── DB Test ─── */
+  async function testConnection() {
+    const db_server = document.getElementById('scrapeDbServer').value.trim()||'ADMIN\\SQLEXPRESS';
+    const db_name   = document.getElementById('scrapeDbName').value.trim()||'leads_db';
+    showLoading(true);
+    try {
+      const resp = await fetch(`${API_BASE_URL}/db-test`,{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({db_server,db_name})
+      });
+      const r = await resp.json();
+      resp.ok&&r.status==='ok'
+        ? Swal.fire('✅ Connected','Database connection verified.','success')
+        : Swal.fire('Error',r.message||'Cannot connect.','error');
+    } catch(e) { Swal.fire('Error',`DB test failed: ${e.message}`,'error'); }
+    finally { showLoading(false); }
+  }
+
+  /* ─── View Leads ─── */
+  async function viewLeads() {
+    if (!sessionToken) { Swal.fire('Authentication Required','Please login first.','warning'); return; }
+    const db_server = document.getElementById('scrapeDbServer').value.trim()||'ADMIN\\SQLEXPRESS';
+    const db_name   = document.getElementById('scrapeDbName').value.trim()||'leads_db';
+    document.getElementById('leadsTable').innerHTML='<div class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>Loading leads...</p></div>';
+    try {
+      const url = new URL(`${API_BASE_URL}/leads`);
+      url.searchParams.set('db_server',db_server);
+      url.searchParams.set('db_name',db_name);
+      const resp = await fetch(url.toString(),{headers:getAuthHeaders()});
+      const data = await resp.json();
+      if (!resp.ok||!Array.isArray(data)) {
+        document.getElementById('leadsTable').innerHTML=`<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Error: ${data.error||data.message||'Unknown'}</p></div>`;
+        return;
+      }
+      renderLeads(data);
+    } catch(e) {
+      document.getElementById('leadsTable').innerHTML=`<div class="empty-state"><i class="fas fa-wifi"></i><p>Load failed: ${e.message}</p></div>`;
+    }
+  }
+
+  /* ─── Render Leads ─── */
+  function normalizeLead(l) {
+    return {
+      id: l.id||'',
+      business_name: l.business_name||l.company_name||'—',
+      phone: l.phone||'—',
+      email: l.email||'—',
+      address: l.address||'—',
+      website: l.website||(l.data&&l.data.website)||'—',
+      source: l.source||'—',
+    };
+  }
+  function sourceBadge(src) {
+    if (src==='google_maps') return `<span class="badge badge-maps"><i class="fas fa-map-marker-alt"></i> Maps</span>`;
+    if (src==='goodfirm')   return `<span class="badge badge-goodfirm"><i class="fas fa-gem"></i> GoodFirm</span>`;
+    if (src==='indiamart')   return `<span class="badge badge-india"><i class="fas fa-industry"></i> IndiaMart</span>`;
+    if (src==='zoho_partner')return `<span class="badge badge-zoho"><i class="fas fa-cloud"></i> Zoho</span>`;
+    return `<span class="badge" style="background:rgba(255,255,255,0.08);color:var(--text-dim);">${src}</span>`;
+  }
+  function renderLeads(leads) {
+    const c = document.getElementById('leadsTable');
+    if (!Array.isArray(leads)||!leads.length) {
+      c.innerHTML='<div class="empty-state"><i class="fas fa-database"></i><p>No leads available. Run a scraper to collect data.</p></div>';
+      return;
+    }
+    let html=`<div class="table-container"><table>
+      <thead><tr>
+        <th>#</th><th>Business Name</th><th>Source</th>
+        <th>Phone</th><th>Email</th><th>Address</th><th>Website</th>
+      </tr></thead><tbody>`;
+    leads.forEach(l=>{
+      const r=normalizeLead(l);
+      const web=r.website&&r.website!=='—'?`<a href="${r.website}" target="_blank">${r.website}</a>`:'—';
+      html+=`<tr>
+        <td style="color:var(--text-mute)">${r.id}</td>
+        <td style="font-weight:600">${r.business_name}</td>
+        <td>${sourceBadge(r.source)}</td>
+        <td>${r.phone}</td><td>${r.email}</td>
+        <td style="max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${r.address}</td>
+        <td>${web}</td>
+      </tr>`;
+    });
+    html+=`</tbody></table></div>`;
+    c.innerHTML=html;
+  }
+
+  /* ─── Export ─── */
+  function exportLeads(fmt) {
+    const c=document.getElementById('leadsTable');
+    const rows=Array.from(c.querySelectorAll('table tr'));
+    if (!rows.length){Swal.fire('No leads','Load leads first.','info');return;}
+    const csv=rows.map(r=>Array.from(r.querySelectorAll('th,td')).map(td=>`"${td.innerText.replace(/"/g,'""')}"`).join(',')).join('\n');
+    const filename=`leads_${new Date().toISOString().slice(0,10)}.${fmt==='excel'?'xls':'csv'}`;
+    const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob); a.download=filename; a.click(); a.remove();
+  }
+
+  /* ─── Profile ─── */
+  async function saveProfile() {
+    if (!sessionToken){Swal.fire('Authentication Required','Please login first.','warning');return;}
+    const email  = document.getElementById('settingsEmail').value.trim()||null;
+    const phone  = document.getElementById('settingsPhone').value.trim()||null;
+    const db_server = document.getElementById('scrapeDbServer').value.trim()||'ADMIN\\SQLEXPRESS';
+    const db_name   = document.getElementById('scrapeDbName').value.trim()||'leads_db';
+    if (!email&&!phone){Swal.fire('Validation Error','Provide email or phone.','error');return;}
+    try {
+      const resp=await fetch(`${API_BASE_URL}/auth/profile`,{
+        method:'POST',headers:getAuthHeaders(),
+        body:JSON.stringify({email,phone,db_server,db_name})
+      });
+      const d=await resp.json();
+      if (!resp.ok){Swal.fire('Error',d.error||'Update failed.','error');return;}
+      currentUser.email=d.email; currentUser.phone=d.phone;
+      document.getElementById('userWelcome').textContent=currentUser.email||currentUser.phone||'Lead Manager';
+      Swal.fire('Saved ✅','Profile updated.','success');
+    } catch(e){Swal.fire('Error',e.message,'error');}
+  }
+
+  async function changePassword() {
+    if (!sessionToken){Swal.fire('Authentication Required','Please login first.','warning');return;}
+    const old_p=document.getElementById('currentPassword').value.trim();
+    const new_p=document.getElementById('newPassword').value.trim();
+    const db_server=document.getElementById('scrapeDbServer').value.trim()||'ADMIN\\SQLEXPRESS';
+    const db_name  =document.getElementById('scrapeDbName').value.trim()||'leads_db';
+    if (!old_p||!new_p){Swal.fire('Validation Error','Enter current and new password.','error');return;}
+    try {
+      const resp=await fetch(`${API_BASE_URL}/auth/password`,{
+        method:'POST',headers:getAuthHeaders(),
+        body:JSON.stringify({old_password:old_p,new_password:new_p,db_server,db_name})
+      });
+      const d=await resp.json();
+      if (!resp.ok){Swal.fire('Error',d.error||'Password update failed.','error');return;}
+      document.getElementById('currentPassword').value='';
+      document.getElementById('newPassword').value='';
+      Swal.fire('Updated ✅','Password changed successfully.','success');
+    } catch(e){Swal.fire('Error',e.message,'error');}
+  }
+
+  function populateSettings() {
+    if (!currentUser) return;
+    document.getElementById('settingsEmail').value=currentUser.email||'';
+    document.getElementById('settingsPhone').value=currentUser.phone||'';
+  }
+
+  async function loadAdminStats() {
+    if (!currentUser||!currentUser.is_superadmin) return;
+    try {
+      const db_server=document.getElementById('scrapeDbServer')||{value:'ADMIN\\SQLEXPRESS'};
+      const db_name  =document.getElementById('scrapeDbName')  ||{value:'leads_db'};
+      const url=new URL(`${API_BASE_URL}/admin/stats`);
+      url.searchParams.set('db_server',db_server.value||'ADMIN\\SQLEXPRESS');
+      url.searchParams.set('db_name',  db_name.value  ||'leads_db');
+      await fetch(url.toString(),{headers:getAuthHeaders()});
+    } catch(e){ console.warn('Admin stats',e); }
+  }
+</script>
+</body>
+</html>
