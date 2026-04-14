@@ -97,6 +97,23 @@ def migrate_db(server=DEFAULT_SERVER, database=DEFAULT_DATABASE):
             IF COL_LENGTH('dbo.users', 'last_login_at') IS NULL
                 ALTER TABLE dbo.users ADD last_login_at DATETIME2 NULL;
         """)
+        # Add profile onboarding columns if missing
+        cursor.execute("""
+            IF COL_LENGTH('dbo.users', 'full_name') IS NULL
+                ALTER TABLE dbo.users ADD full_name NVARCHAR(200) NULL;
+        """)
+        cursor.execute("""
+            IF COL_LENGTH('dbo.users', 'birthdate') IS NULL
+                ALTER TABLE dbo.users ADD birthdate DATE NULL;
+        """)
+        cursor.execute("""
+            IF COL_LENGTH('dbo.users', 'display_name') IS NULL
+                ALTER TABLE dbo.users ADD display_name NVARCHAR(100) NULL;
+        """)
+        cursor.execute("""
+            IF COL_LENGTH('dbo.users', 'profile_complete') IS NULL
+                ALTER TABLE dbo.users ADD profile_complete BIT NOT NULL DEFAULT 0;
+        """)
         conn.commit()
         conn.close()
         print("[DB] Migration completed successfully.")
@@ -112,18 +129,24 @@ def get_user_by_email(email, server=DEFAULT_SERVER, database=DEFAULT_DATABASE):
         return None
     conn = get_connection(server, database)
     cursor = conn.cursor()
-    cursor.execute(
-        "SELECT id, email, phone, password_hash, is_superadmin, login_count, last_login_at, full_name, birthdate, display_name, profile_complete "
-        "FROM users WHERE email = ?",
-        (email.lower(),)
-    )
+    try:
+        cursor.execute(
+            "SELECT id, email, phone, password_hash, is_superadmin, login_count, last_login_at, full_name, birthdate, display_name, profile_complete "
+            "FROM users WHERE email = ?",
+            (email.lower(),)
+        )
+    except pyodbc.Error:
+        cursor.execute(
+            "SELECT id, email, phone, password_hash, is_superadmin, login_count, last_login_at FROM users WHERE email = ?",
+            (email.lower(),)
+        )
     row = cursor.fetchone()
     conn.close()
 
     if not row:
         return None
 
-    return {
+    result = {
         'id': row[0],
         'email': row[1],
         'phone': row[2],
@@ -131,11 +154,15 @@ def get_user_by_email(email, server=DEFAULT_SERVER, database=DEFAULT_DATABASE):
         'is_superadmin': bool(row[4]),
         'login_count': row[5],
         'last_login_at': row[6],
-        'full_name': row[7],
-        'birthdate': row[8],
-        'display_name': row[9],
-        'profile_complete': bool(row[10]),
     }
+    if len(row) >= 11:
+        result.update({
+            'full_name': row[7],
+            'birthdate': row[8],
+            'display_name': row[9],
+            'profile_complete': bool(row[10]),
+        })
+    return result
 
 
 def get_user_by_phone(phone, server=DEFAULT_SERVER, database=DEFAULT_DATABASE):
@@ -143,18 +170,24 @@ def get_user_by_phone(phone, server=DEFAULT_SERVER, database=DEFAULT_DATABASE):
         return None
     conn = get_connection(server, database)
     cursor = conn.cursor()
-    cursor.execute(
-        "SELECT id, email, phone, password_hash, is_superadmin, login_count, last_login_at, full_name, birthdate, display_name, profile_complete "
-        "FROM users WHERE phone = ?",
-        (phone,)
-    )
+    try:
+        cursor.execute(
+            "SELECT id, email, phone, password_hash, is_superadmin, login_count, last_login_at, full_name, birthdate, display_name, profile_complete "
+            "FROM users WHERE phone = ?",
+            (phone,)
+        )
+    except pyodbc.Error:
+        cursor.execute(
+            "SELECT id, email, phone, password_hash, is_superadmin, login_count, last_login_at FROM users WHERE phone = ?",
+            (phone,)
+        )
     row = cursor.fetchone()
     conn.close()
 
     if not row:
         return None
 
-    return {
+    result = {
         'id': row[0],
         'email': row[1],
         'phone': row[2],
@@ -162,11 +195,15 @@ def get_user_by_phone(phone, server=DEFAULT_SERVER, database=DEFAULT_DATABASE):
         'is_superadmin': bool(row[4]),
         'login_count': row[5],
         'last_login_at': row[6],
-        'full_name': row[7],
-        'birthdate': row[8],
-        'display_name': row[9],
-        'profile_complete': bool(row[10]),
     }
+    if len(row) >= 11:
+        result.update({
+            'full_name': row[7],
+            'birthdate': row[8],
+            'display_name': row[9],
+            'profile_complete': bool(row[10]),
+        })
+    return result
 
 
 def get_user_by_identifier(identifier, server=DEFAULT_SERVER, database=DEFAULT_DATABASE):
@@ -175,6 +212,12 @@ def get_user_by_identifier(identifier, server=DEFAULT_SERVER, database=DEFAULT_D
     if '@' in identifier:
         return get_user_by_email(identifier, server, database)
     return get_user_by_phone(identifier, server, database)
+
+
+if __name__ == "__main__":
+    print("Running DB migration...")
+    migrate_db()
+    print("Done.")
 
 
 def create_user(email=None, phone=None, password=None, server=DEFAULT_SERVER, database=DEFAULT_DATABASE, is_superadmin=False):
@@ -189,22 +232,38 @@ def create_user(email=None, phone=None, password=None, server=DEFAULT_SERVER, da
         (email.lower() if email else None, phone if phone else None, hash_password(password), 1 if is_superadmin else 0)
     )
     conn.commit()
-    cursor.execute(
-        "SELECT id, email, phone, is_superadmin, full_name, birthdate, display_name, profile_complete FROM users WHERE id = ?",
-        (cursor.lastrowid,)
-    )
-    row = cursor.fetchone()
-    conn.close()
-    return {
-        'id': row[0],
-        'email': row[1],
-        'phone': row[2],
-        'is_superadmin': bool(row[3]),
-        'full_name': row[4],
-        'birthdate': row[5],
-        'display_name': row[6],
-        'profile_complete': bool(row[7]),
-    } if row else None
+    try:
+        cursor.execute(
+            "SELECT id, email, phone, is_superadmin, full_name, birthdate, display_name, profile_complete FROM users WHERE id = ?",
+            (cursor.lastrowid,)
+        )
+        row = cursor.fetchone()
+        if not row:
+            return None
+        return {
+            'id': row[0],
+            'email': row[1],
+            'phone': row[2],
+            'is_superadmin': bool(row[3]),
+            'full_name': row[4],
+            'birthdate': row[5],
+            'display_name': row[6],
+            'profile_complete': bool(row[7]),
+        }
+    except pyodbc.Error:
+        cursor.execute(
+            "SELECT id, email, phone, is_superadmin FROM users WHERE id = ?",
+            (cursor.lastrowid,)
+        )
+        row = cursor.fetchone()
+        return {
+            'id': row[0],
+            'email': row[1],
+            'phone': row[2],
+            'is_superadmin': bool(row[3]),
+        } if row else None
+    finally:
+        conn.close()
 
 
 
@@ -230,29 +289,42 @@ def get_user_by_token(token, server=DEFAULT_SERVER, database=DEFAULT_DATABASE):
 
     conn = get_connection(server, database)
     cursor = conn.cursor()
-    cursor.execute(
-        "SELECT u.id, u.email, u.phone, u.is_superadmin, u.full_name, u.birthdate, u.display_name, u.profile_complete "
-        "FROM users u "
-        "JOIN sessions s ON s.user_id = u.id "
-        "WHERE s.token = ? AND s.is_active = 1 AND s.expires_at > ?",
-        (token, datetime.utcnow())
-    )
+    try:
+        cursor.execute(
+            "SELECT u.id, u.email, u.phone, u.is_superadmin, u.full_name, u.birthdate, u.display_name, u.profile_complete "
+            "FROM users u "
+            "JOIN sessions s ON s.user_id = u.id "
+            "WHERE s.token = ? AND s.is_active = 1 AND s.expires_at > ?",
+            (token, datetime.utcnow())
+        )
+    except pyodbc.Error:
+        cursor.execute(
+            "SELECT u.id, u.email, u.phone, u.is_superadmin "
+            "FROM users u "
+            "JOIN sessions s ON s.user_id = u.id "
+            "WHERE s.token = ? AND s.is_active = 1 AND s.expires_at > ?",
+            (token, datetime.utcnow())
+        )
     row = cursor.fetchone()
     conn.close()
 
     if not row:
         return None
 
-    return {
+    result = {
         'id': row[0],
         'email': row[1],
         'phone': row[2],
         'is_superadmin': bool(row[3]),
-        'full_name': row[4],
-        'birthdate': row[5],
-        'display_name': row[6],
-        'profile_complete': bool(row[7]),
     }
+    if len(row) >= 8:
+        result.update({
+            'full_name': row[4],
+            'birthdate': row[5],
+            'display_name': row[6],
+            'profile_complete': bool(row[7]),
+        })
+    return result
 
 
 def update_user_contact(user_id, email=None, phone=None, server=DEFAULT_SERVER, database=DEFAULT_DATABASE):
@@ -268,13 +340,12 @@ def update_user_contact(user_id, email=None, phone=None, server=DEFAULT_SERVER, 
     conn.close()
 
 
-def update_user_profile(user_id, email=None, phone=None, full_name=None, birthdate=None, server=DEFAULT_SERVER, database=DEFAULT_DATABASE):
-    if not email and not phone and not full_name and not birthdate:
+def update_user_profile(user_id, email=None, phone=None, full_name=None, birthdate=None, display_name=None, server=DEFAULT_SERVER, database=DEFAULT_DATABASE):
+    if not email and not phone and not full_name and not birthdate and not display_name:
         raise ValueError('At least one profile field is required')
 
-    display_name = None
     profile_complete = None
-    if full_name:
+    if full_name and not display_name:
         display_name = derive_display_name(full_name)
 
     if birthdate and isinstance(birthdate, str):
@@ -283,9 +354,9 @@ def update_user_profile(user_id, email=None, phone=None, full_name=None, birthda
         except ValueError:
             raise ValueError('Birthdate must be in YYYY-MM-DD format')
 
-    if full_name and birthdate:
+    if (full_name or display_name) and birthdate:
         profile_complete = 1
-    elif full_name or birthdate:
+    elif full_name or birthdate or display_name:
         profile_complete = 0
 
     conn = get_connection(server, database)

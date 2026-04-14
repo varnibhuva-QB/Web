@@ -136,10 +136,11 @@ def auth_profile():
     email = (request.json.get('email') or '').strip().lower() or None
     phone = (request.json.get('phone') or '').strip() or None
     full_name = (request.json.get('full_name') or '').strip() or None
+    display_name = (request.json.get('display_name') or '').strip() or None
     birthdate = (request.json.get('birthdate') or '').strip() or None
 
-    if not email and not phone and not full_name and not birthdate:
-        return jsonify({"error": "Email, phone, full name, or birthdate is required"}), 400
+    if not email and not phone and not full_name and not birthdate and not display_name:
+        return jsonify({"error": "Email, phone, full name, display name, or birthdate is required"}), 400
 
     try:
         update_user_profile(
@@ -148,6 +149,7 @@ def auth_profile():
             phone=phone,
             full_name=full_name,
             birthdate=birthdate,
+            display_name=display_name,
             server=db_server,
             database=db_name
         )
@@ -169,6 +171,8 @@ def auth_profile():
         "email": updated_user.get('email'),
         "phone": updated_user.get('phone'),
         "display_name": display_name,
+        "full_name": updated_user.get('full_name'),
+        "birthdate": updated_user.get('birthdate') and updated_user.get('birthdate').isoformat(),
         "profile_required": not bool(updated_user.get('profile_complete'))
     })
 

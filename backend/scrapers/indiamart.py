@@ -287,16 +287,31 @@ def extract_card(card):
             record["business_type"] = btype
             break
 
-    # ── Company profile URL ───────────────────────────────────────────────────
+    # ── Company profile / website URL ─────────────────────────────────────────
     for sel in [
         (By.CSS_SELECTOR, "a.lcname"),
         (By.CSS_SELECTOR, "div.companyname a"),
         (By.CSS_SELECTOR, "a[href*='indiamart.com']"),
+        (By.XPATH, ".//a[contains(@href,'http') and (contains(text(),'Website') or contains(@href,'http'))]"),
     ]:
         href = safe_attr(card, *sel, "href")
-        if href and "indiamart.com" in href and "search" not in href:
-            record["website"] = href
-            break
+        if href and href.startswith("http"):
+            if "indiamart.com" in href and "search" not in href:
+                record["website"] = href
+                break
+            if record["website"] == "" or record["website"] is None:
+                record["website"] = href
+
+    # Final fallback for website text within the card
+    if not record["website"]:
+        for sel in [
+            (By.CSS_SELECTOR, "span.website"),
+            (By.XPATH, ".//span[contains(text(),'www.') or contains(text(),'http') or contains(text(),'.')]"),
+        ]:
+            raw = safe_text(card, *sel)
+            if raw and raw.startswith("http"):
+                record["website"] = raw.strip()
+                break
 
     return record
 
